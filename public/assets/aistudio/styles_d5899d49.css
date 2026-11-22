@@ -1,0 +1,236 @@
+* { box-sizing: border-box; }
+
+:root {
+    --ink: #22203a;
+    --muted: #5d5a78;
+    --accent: #e2552d;
+    --accent2: #7b3fa0;
+    --ok: #16794a;
+    --err: #b3261e;
+    --glass: rgba(255, 252, 246, 0.84);
+}
+
+html, body { margin: 0; min-height: 100%; }
+
+body {
+    color: var(--ink);
+    font-family: "Noto Sans Khmer", "Khmer OS", system-ui, sans-serif;
+    line-height: 1.7;
+    background: #2a1d4a;
+}
+
+/* ផ្ទៃខាងក្រោយជារូបអង្គរវត្ត ហើយពង្រីកយឺតៗ */
+body::before {
+    content: "";
+    position: fixed;
+    inset: -4%;
+    z-index: -2;
+    background: url("angkor-wat.jpg") center / cover no-repeat;
+    filter: blur(3px) saturate(1.1);
+    animation: slowZoom 28s ease-in-out infinite alternate;
+}
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(160deg, rgba(255,160,90,.35), rgba(90,50,150,.55));
+    animation: tint 14s ease-in-out infinite alternate;
+}
+@keyframes slowZoom { from { transform: scale(1); } to { transform: scale(1.12) translateX(-1.5%); } }
+@keyframes tint { from { opacity: .75; } to { opacity: 1; } }
+
+.page-shell {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 32px 16px;
+}
+
+.demo-card {
+    width: min(1000px, 100%);
+    padding: clamp(22px, 5vw, 48px);
+    background: var(--glass);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,.7);
+    border-radius: 24px;
+    box-shadow: 0 30px 70px rgba(30, 15, 70, .45);
+    animation: enter .9s cubic-bezier(.2,.7,.2,1) both;
+}
+@keyframes enter { from { opacity: 0; transform: translateY(30px) scale(.98); } to { opacity: 1; transform: none; } }
+
+.eyebrow { margin: 0 0 4px; color: var(--accent); font-weight: 700; }
+
+h2 { margin: 0 0 26px; font-size: clamp(1.4rem, 3.4vw, 2rem); line-height: 1.45; }
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: clamp(24px, 4vw, 40px);
+    align-items: start;
+}
+
+.intro { min-width: 0; }
+
+.greeting, .calculation {
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(123,63,160,.14);
+    border-radius: 16px;
+    transition: transform .35s ease, box-shadow .35s ease;
+}
+.greeting:focus-within, .calculation:focus-within {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(123,63,160,.2);
+}
+
+label { display: block; margin: 8px 0 4px; font-weight: 500; }
+
+input[type="text"], input[type="number"] {
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 14px;
+    font: inherit;
+    color: var(--ink);
+    background: #fff;
+    border: 1.5px solid #d9d3e8;
+    border-radius: 10px;
+    transition: border-color .25s, box-shadow .25s;
+}
+input:focus { outline: none; border-color: var(--accent2); box-shadow: 0 0 0 4px rgba(123,63,160,.15); }
+
+button {
+    margin-top: 14px;
+    padding: 11px 22px;
+    font: inherit;
+    font-weight: 700;
+    color: #fff;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    background: linear-gradient(120deg, var(--accent), #f08a3c);
+    box-shadow: 0 8px 20px rgba(226,85,45,.35);
+    transition: transform .25s ease, box-shadow .25s ease, filter .25s;
+}
+button:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(226,85,45,.45); filter: brightness(1.05); }
+button:active { transform: scale(.97); }
+button:focus-visible { outline: 3px solid var(--accent2); outline-offset: 3px; }
+
+.status {
+    margin: 6px 0 0;
+    padding: 14px 18px;
+    font-weight: 700;
+    background: #fff;
+    border-left: 5px solid var(--ok);
+    border-radius: 14px;
+    color: var(--ok);
+}
+.status:empty { display: none; }
+.status.pop { animation: pop .45s cubic-bezier(.2,1.4,.4,1); }
+@keyframes pop { from { opacity: 0; transform: translateY(10px) scale(.95); } to { opacity: 1; transform: none; } }
+
+.voice { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px; font-size: .95rem; }
+.voice label { display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer; }
+.voice input { width: auto; accent-color: var(--accent2); }
+.voice button {
+    margin: 0;
+    padding: 7px 16px;
+    font-size: .9rem;
+    background: linear-gradient(120deg, var(--accent2), #4b3a9a);
+    box-shadow: 0 6px 16px rgba(75,58,154,.35);
+}
+.voice-note { margin: 6px 0 0; color: #8a4b00; font-size: .85rem; }
+
+.image-panel { margin: 0; position: sticky; top: 24px; }
+.image-panel img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: 0 20px 44px rgba(30,15,70,.4);
+    transition: transform .6s ease;
+}
+.image-panel img:hover { transform: scale(1.02) rotate(-.5deg); }
+.image-panel figcaption {
+    margin-top: 12px;
+    padding: 6px 14px;
+    font-size: .95rem;
+    text-align: center;
+    color: #fff;
+    background: rgba(42,29,74,.6);
+    border-radius: 999px;
+}
+
+@media (max-width: 780px) {
+    .content-grid { grid-template-columns: 1fr; }
+    .image-panel { position: static; order: -1; }
+    .image-panel img { aspect-ratio: 16 / 10; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+
+/* ===== ចលនាបន្ថែម ===== */
+.fx { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.cloud { position: absolute; height: 60px; border-radius: 60px; background: rgba(255,255,255,.3); filter: blur(12px); animation: drift linear infinite; }
+.c1 { top: 10%; width: 280px; animation-duration: 70s; }
+.c2 { top: 26%; width: 190px; animation-duration: 100s; animation-delay: -45s; }
+.c3 { top: 5%;  width: 230px; animation-duration: 125s; animation-delay: -85s; }
+@keyframes drift { from { transform: translateX(-320px); } to { transform: translateX(calc(100vw + 320px)); } }
+
+.spark { position: absolute; bottom: -20px; width: 8px; height: 8px; border-radius: 50%;
+    background: radial-gradient(circle, #fff3b0, rgba(255,200,90,0) 70%); animation: floatUp linear infinite; }
+@keyframes floatUp { 0% { transform: translateY(0) translateX(0); opacity: 0; } 15% { opacity: .9; }
+    100% { transform: translateY(-110vh) translateX(40px); opacity: 0; } }
+
+.bird { position: absolute; width: 18px; height: 8px; border-top: 2px solid rgba(255,255,255,.75); border-radius: 50%; animation: fly 28s linear infinite; }
+.b1 { top: 18%; animation-delay: -4s; }
+.b2 { top: 23%; animation-delay: -12s; transform: scale(.8); }
+@keyframes fly { from { left: -5%; margin-top: 0; } 50% { margin-top: -28px; } to { left: 105%; margin-top: 12px; } }
+
+.image-panel { perspective: 900px; }
+.image-panel img { transition: transform .15s ease-out, box-shadow .3s; will-change: transform; }
+
+.sound-toggles { display: flex; gap: 18px; flex-wrap: wrap; }
+.ripple { position: relative; overflow: hidden; }
+.ripple span.r { position: absolute; border-radius: 50%; background: rgba(255,255,255,.5); transform: scale(0); animation: rip .6s ease-out forwards; pointer-events: none; }
+@keyframes rip { to { transform: scale(4); opacity: 0; } }
+.status.pop { animation: pop .5s cubic-bezier(.2,1.4,.4,1), glow 1.2s ease-out; }
+@keyframes glow { from { box-shadow: 0 0 0 0 rgba(22,121,74,.45); } to { box-shadow: 0 0 0 18px rgba(22,121,74,0); } }
+
+
+/* ===== ប៊ូតុងរុករករវាងទំព័រ ===== */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+.topbar .eyebrow { margin: 0; }
+.nav-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; font-weight: 700; font-size: .95rem; text-decoration: none; color: #fff;
+    background: linear-gradient(120deg, var(--accent2), #4b3a9a);
+    border-radius: 999px; box-shadow: 0 8px 20px rgba(75,58,154,.38);
+    position: relative; overflow: hidden;
+    transition: transform .25s ease, box-shadow .25s ease, filter .25s;
+}
+.nav-btn::after { content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent); transform: skewX(-20deg); animation: sheen 4.5s ease-in-out infinite; }
+@keyframes sheen { 0%, 60% { left: -80%; } 100% { left: 140%; } }
+.nav-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(75,58,154,.5); filter: brightness(1.08); }
+.nav-btn:active { transform: scale(.97); }
+.nav-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.nav-btn .arrow { display: inline-block; transition: transform .25s ease; }
+.nav-btn:hover .arrow { transform: translateX(4px); }
+.nav-btn.back:hover .arrow { transform: translateX(-4px); }
+
+
+/* ===== ជ្រើសរើសភាសាសម្លេង ===== */
+.voice-picker { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center; margin-top: 12px; padding: 14px 16px;
+    background: rgba(255,255,255,.7); border: 1px solid rgba(123,63,160,.16); border-radius: 14px; animation: pop .5s ease both; }
+.voice-picker label { margin: 0; font-size: .9rem; }
+.voice-picker select { width: 100%; min-height: 42px; padding: 8px 12px; font: inherit; font-size: .95rem; color: var(--ink); background: #fff;
+    border: 1.5px solid #d9d3e8; border-radius: 10px; transition: border-color .25s, box-shadow .25s; }
+.voice-picker select:focus { outline: none; border-color: var(--accent2); box-shadow: 0 0 0 4px rgba(123,63,160,.15); }
+.voice-picker button { grid-column: 1 / -1; justify-self: start; margin: 4px 0 0; padding: 8px 18px; font-size: .9rem;
+    background: linear-gradient(120deg, var(--accent2), #4b3a9a); box-shadow: 0 6px 16px rgba(75,58,154,.35); }

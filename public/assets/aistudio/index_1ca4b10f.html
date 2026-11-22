@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ឧទាហរណ៍អនុគមន៍ JavaScript</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="fx" aria-hidden="true">
+        <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+        <div class="bird b1"></div><div class="bird b2"></div>
+        <div id="sparks"></div>
+    </div>
+    <main class="page-shell">
+        <section class="demo-card" aria-labelledby="page-title">
+            <div class="topbar">
+                <p class="eyebrow">JavaScript / អនុគមន៍</p>
+                <a class="nav-btn" href="profile.html">លំហាត់ Student profile <span class="arrow">→</span></a>
+            </div>
+            <h2 id="page-title">អនុគមន៍ប៉ារ៉ាម៉ែត្រ និងតម្លៃត្រឡប់</h2>
+
+            <div class="content-grid">
+                <div class="intro">
+                    <div class="greeting">
+                        <label for="name-input">ឈ្មោះរបស់អ្នក</label>
+                        <input id="name-input" type="text" placeholder="សូមបញ្ចូលឈ្មោះ">
+                        <button type="button" onclick="showGreeting()">បង្កើតការស្វាគមន៍</button>
+                    </div>
+
+                    <div class="calculation">
+                        <label for="first-number">លេខទីមួយ</label>
+                        <input id="first-number" type="number" value="10">
+
+                        <label for="second-number">លេខទីពីរ</label>
+                        <input id="second-number" type="number" value="5">
+                        <button type="button" onclick="showSum()">គណនាផលបូក</button>
+                    </div>
+
+                    <div class="calculation">
+                        <label for="rectangle-length">ប្រវែងចតុកោណ</label>
+                        <input id="rectangle-length" type="number" value="12">
+
+                        <label for="rectangle-width">ទទឹងចតុកោណ</label>
+                        <input id="rectangle-width" type="number" value="8">
+                        <button type="button" onclick="showArea()">គណនាផ្ទៃក្រឡា</button>
+                    </div>
+
+                    <p id="result" class="status" aria-live="polite"></p>
+
+                    <div class="voice">
+                        <div class="sound-toggles">
+                            <label><input type="checkbox" id="voice-toggle" checked> អានលទ្ធផលជាសម្លេង</label>
+                            <label><input type="checkbox" id="chime-toggle" checked> សំឡេងស្គរ/ជួង</label>
+                        </div>
+                        <button type="button" onclick="speakResult()">🔊 ស្តាប់ម្តងទៀត</button>
+                    </div>
+                    <div id="voice-picker" class="voice-picker"></div>
+                    <p id="voice-note" class="voice-note" role="status"></p>
+                </div>
+
+                <figure class="image-panel">
+                    <img src="angkor-wat.jpg" alt="ប្រាសាទអង្គរវត្ត">
+                    <figcaption>ប្រាសាទអង្គរវត្ត</figcaption>
+                </figure>
+            </div>
+        </section>
+    </main>
+
+    <script src="voice.js"></script>
+    <script>
+        // អនុគមន៍មានប៉ារ៉ាម៉ែត្រ និងតម្លៃត្រឡប់
+        function greetUser(name) {
+            return "សួស្តី " + name + "!";
+        }
+
+        function addNumbers(firstNumber, secondNumber) {
+            return firstNumber + secondNumber;
+        }
+
+        function calculateArea(length, width) {
+            return length * width;
+        }
+
+        // អានជាសម្លេង
+        function toSpeech(text) {
+            return text.replace(/\+/g, " បូក ").replace(/×/g, " គុណ ").replace(/=/g, " ស្មើ ");
+        }
+
+        function speak(text) {
+            VoicePicker.speak(toSpeech(text), "km-KH");
+        }
+
+        function speakResult() {
+            const text = document.getElementById("result").textContent;
+            if (text) speak(text);
+        }
+
+        if ("speechSynthesis" in window) window.speechSynthesis.getVoices();
+
+
+        // ===== សំឡេងបន្ទរ (Web Audio មិនចាំបាច់មានឯកសារ) =====
+        let audioCtx = null;
+        function tone(freq, start, dur, type, vol) {
+            const t0 = audioCtx.currentTime + start;
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = type || "sine";
+            o.frequency.value = freq;
+            g.gain.setValueAtTime(0.0001, t0);
+            g.gain.exponentialRampToValueAtTime(vol || 0.18, t0 + 0.02);
+            g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+            o.connect(g).connect(audioCtx.destination);
+            o.start(t0);
+            o.stop(t0 + dur + 0.05);
+        }
+        function playChime(isError) {
+            if (!document.getElementById("chime-toggle").checked) return;
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return;
+            audioCtx = audioCtx || new AC();
+            if (audioCtx.state === "suspended") audioCtx.resume();
+            if (isError) {
+                tone(220, 0, 0.25, "triangle", 0.15);
+                tone(165, 0.12, 0.3, "triangle", 0.15);
+            } else {
+                tone(659, 0, 0.5, "sine");     // E5
+                tone(880, 0.12, 0.5, "sine");  // A5
+                tone(1319, 0.26, 0.8, "sine", 0.12); // E6
+            }
+        }
+
+        // ===== ចលនា: ពន្លឺអណ្តែត =====
+        (function makeSparks() {
+            const box = document.getElementById("sparks");
+            for (let i = 0; i < 22; i++) {
+                const s = document.createElement("i");
+                s.className = "spark";
+                s.style.left = Math.random() * 100 + "%";
+                s.style.animationDuration = 9 + Math.random() * 12 + "s";
+                s.style.animationDelay = -Math.random() * 20 + "s";
+                s.style.transform = "scale(" + (0.6 + Math.random() * 1.4) + ")";
+                box.appendChild(s);
+            }
+        })();
+
+        // ===== រូបភាពរេតាមកណ្តុរ =====
+        (function tiltImage() {
+            const img = document.querySelector(".image-panel img");
+            if (!img || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+            document.addEventListener("mousemove", function (e) {
+                const x = (e.clientX / innerWidth - 0.5) * 2;
+                const y = (e.clientY / innerHeight - 0.5) * 2;
+                img.style.transform = "rotateY(" + x * 6 + "deg) rotateX(" + -y * 5 + "deg) scale(1.02)";
+            });
+        })();
+
+        // ===== រលកពេលចុចប៊ូតុង =====
+        document.querySelectorAll("button").forEach(function (b) {
+            b.classList.add("ripple");
+            b.addEventListener("click", function (e) {
+                const r = b.getBoundingClientRect();
+                const s = document.createElement("span");
+                s.className = "r";
+                const size = Math.max(r.width, r.height) / 2;
+                s.style.cssText = "width:" + size + "px;height:" + size + "px;left:" + (e.clientX - r.left - size / 2) + "px;top:" + (e.clientY - r.top - size / 2) + "px";
+                b.appendChild(s);
+                setTimeout(function () { s.remove(); }, 600);
+            });
+        });
+
+        // បង្ហាញលទ្ធផល
+        function showMessage(message, isError) {
+            const result = document.getElementById("result");
+            result.textContent = message;
+            const color = isError ? "#b3261e" : "#16794a";
+            result.style.color = color;
+            result.style.borderLeftColor = color;
+            result.classList.remove("pop");
+            void result.offsetWidth;
+            result.classList.add("pop");
+            playChime(isError);
+            if (document.getElementById("voice-toggle").checked) speak(message);
+        }
+
+        function readNumbers(idA, idB) {
+            const a = document.getElementById(idA).value;
+            const b = document.getElementById(idB).value;
+            if (a === "" || b === "" || isNaN(Number(a)) || isNaN(Number(b))) return null;
+            return [Number(a), Number(b)];
+        }
+
+        function showGreeting() {
+            const name = document.getElementById("name-input").value.trim();
+            if (name) {
+                showMessage(greetUser(name), false);
+            } else {
+                showMessage("សូមបញ្ចូលឈ្មោះ។", true);
+            }
+        }
+
+        function showSum() {
+            const nums = readNumbers("first-number", "second-number");
+            if (!nums) return showMessage("សូមបញ្ចូលលេខឱ្យត្រឹមត្រូវ។", true);
+            showMessage("ផលបូក " + nums[0] + " + " + nums[1] + " = " + addNumbers(nums[0], nums[1]), false);
+        }
+
+        function showArea() {
+            const nums = readNumbers("rectangle-length", "rectangle-width");
+            if (!nums) return showMessage("សូមបញ្ចូលលេខឱ្យត្រឹមត្រូវ។", true);
+            showMessage("ផ្ទៃក្រឡា " + nums[0] + " × " + nums[1] + " = " + calculateArea(nums[0], nums[1]), false);
+        }
+    </script>
+</body>
+</html>
