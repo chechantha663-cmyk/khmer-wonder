@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ឆ្មាអាចារ្យ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+.lead{margin:-10px 0 22px;color:var(--muted)}
+.content-grid{align-items:start}
+.cat-stage{display:grid;place-items:center;padding:18px 10px 8px;background:linear-gradient(160deg,#fff4ea,#f3ecfb);border:1px solid rgba(123,63,160,.16);border-radius:18px}
+.cat{width:min(300px,80%);cursor:pointer;animation:breathe 3.2s ease-in-out infinite;-webkit-tap-highlight-color:transparent;user-select:none}
+@keyframes breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.015)}}
+.cat .eye{transform-box:fill-box;transform-origin:center;animation:blink 4.5s infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.cat .tail{transform-box:fill-box;transform-origin:0% 100%;animation:wag 2.4s ease-in-out infinite}
+@keyframes wag{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(14deg)}}
+.cat .ear{transform-box:fill-box;transform-origin:50% 100%;animation:ear 6s ease-in-out infinite}
+.cat .ear.r{animation-delay:-2.5s}
+@keyframes ear{0%,90%,100%{transform:rotate(0)}95%{transform:rotate(-8deg)}}
+.cat .mouth{transform-box:fill-box;transform-origin:50% 0%;transform:scaleY(.25)}
+.cat.talking .mouth{animation:talk .22s ease-in-out infinite alternate}
+@keyframes talk{from{transform:scaleY(.25)}to{transform:scaleY(1.2)}}
+.cat.talking{animation:bounceTalk .45s ease-in-out infinite}
+@keyframes bounceTalk{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-8px) rotate(1.5deg)}}
+.cat.poked{animation:poke .5s ease}
+@keyframes poke{0%{transform:scale(1)}30%{transform:scale(1.12) rotate(-5deg)}60%{transform:scale(.96) rotate(4deg)}100%{transform:scale(1)}}
+.status-line{min-height:1.6em;margin:6px 0 0;color:var(--muted);font-size:.95rem;text-align:center}
+.mic-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0 10px}
+.mic-row button{margin:0}
+.mic-on{background:linear-gradient(120deg,#d62f2f,#f06a3c)!important;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(214,47,47,.5)}50%{box-shadow:0 0 0 14px rgba(214,47,47,0)}}
+.chatlog{height:300px;overflow-y:auto;padding:12px;background:rgba(255,255,255,.85);border:1px solid rgba(123,63,160,.16);border-radius:14px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:85%;padding:9px 14px;border-radius:16px;line-height:1.6;animation:pop .35s cubic-bezier(.2,1.4,.4,1);white-space:pre-wrap}
+.msg.me{align-self:flex-end;background:linear-gradient(120deg,var(--accent),#f08a3c);color:#fff;border-bottom-right-radius:4px}
+.msg.cat{align-self:flex-start;background:#f1eafb;color:var(--ink);border-bottom-left-radius:4px}
+.row{display:flex;gap:10px;margin-top:10px}
+.row input{flex:1;min-width:0}
+.row button{margin:0;white-space:nowrap}
+.seg{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.seg label{display:flex;align-items:center;gap:6px;margin:0;padding:8px 14px;background:#fff;border:1.5px solid #d9d3e8;border-radius:999px;cursor:pointer;font-weight:500;transition:border-color .2s,background .2s}
+.seg input{display:none}
+.seg label:has(input:checked){border-color:var(--accent2);background:#f1e8fb}
+.sliders{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;margin-top:12px;font-size:.92rem}
+.sliders label{margin:0}
+.sliders input[type=range]{width:100%;min-height:0;padding:0;accent-color:var(--accent2)}
+.sliders select{min-height:40px;padding:6px 10px;font:inherit;border:1.5px solid #d9d3e8;border-radius:10px;background:#fff}
+.topnav{display:flex;gap:10px;flex-wrap:wrap}
+.warn{margin:8px 0 0;color:#8a4b00;font-size:.85rem}
+.honest{margin:14px 0 0;color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="fx" aria-hidden="true">
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+  <div class="bird b1"></div><div class="bird b2"></div>
+  <div id="sparks"></div>
+</div>
+
+<main class="page-shell">
+ <section class="demo-card" aria-labelledby="page-title">
+  <div class="topbar">
+    <p class="eyebrow">JavaScript / Talking Cat</p>
+    <div class="topnav">
+      <a class="nav-btn back" href="fun.html"><span class="arrow">←</span> លេងជាមួយមិត្ត</a>
+      <a class="nav-btn back" href="index.html"><span class="arrow">←</span> អនុគមន៍</a>
+    </div>
+  </div>
+  <h2 id="page-title">🐱 ឆ្មាអាចារ្យ អ្នកកំប្លែង</h2>
+  <p class="lead">និយាយ ឬវាយអ្វីមួយ ហើយឆ្មានឹងឆ្លើយតបដោយកំប្លែង ឬត្រាប់តាមអ្នកដោយសម្លេងតូចស្រួយ ដូចហ្គេមឆ្មានិយាយ!</p>
+
+  <div class="content-grid">
+   <div>
+    <div class="cat-stage">
+      <svg id="cat" class="cat" viewBox="0 0 220 230" role="img" aria-label="ឆ្មាកំប្លែង" onclick="pokeCat()">
+        <path class="tail" d="M165 190 C215 190 225 130 195 110 C215 150 190 170 160 168 Z" fill="#f08a3c"/>
+        <ellipse cx="110" cy="182" rx="52" ry="40" fill="#f6a04d"/>
+        <ellipse cx="110" cy="192" rx="30" ry="28" fill="#ffe3c2"/>
+        <g class="ear"><polygon points="52,70 58,18 98,48" fill="#f08a3c"/><polygon points="62,60 65,34 85,50" fill="#ffb3a7"/></g>
+        <g class="ear r"><polygon points="168,70 162,18 122,48" fill="#f08a3c"/><polygon points="158,60 155,34 135,50" fill="#ffb3a7"/></g>
+        <circle cx="110" cy="100" r="62" fill="#f6a04d"/>
+        <path d="M96 44 L100 62 M110 40 L110 60 M124 44 L120 62" stroke="#d9772a" stroke-width="5" stroke-linecap="round"/>
+        <ellipse class="eye" cx="84" cy="95" rx="11" ry="14" fill="#fff"/>
+        <ellipse class="eye" cx="136" cy="95" rx="11" ry="14" fill="#fff"/>
+        <circle class="eye" cx="86" cy="98" r="6" fill="#2a1d4a"/>
+        <circle class="eye" cx="134" cy="98" r="6" fill="#2a1d4a"/>
+        <circle cx="88" cy="95" r="2.2" fill="#fff"/><circle cx="136" cy="95" r="2.2" fill="#fff"/>
+        <ellipse cx="66" cy="120" rx="11" ry="7" fill="#ff9aa2" opacity=".6"/>
+        <ellipse cx="154" cy="120" rx="11" ry="7" fill="#ff9aa2" opacity=".6"/>
+        <polygon points="102,114 118,114 110,124" fill="#e0607e"/>
+        <ellipse class="mouth" cx="110" cy="134" rx="13" ry="12" fill="#8a2a3a"/>
+        <ellipse cx="110" cy="141" rx="7" ry="4" fill="#ff7b8c" class="mouth"/>
+        <g stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".9">
+          <path d="M60 118 L22 108"/><path d="M60 126 L20 130"/><path d="M60 134 L26 148"/>
+          <path d="M160 118 L198 108"/><path d="M160 126 L200 130"/><path d="M160 134 L194 148"/>
+        </g>
+        <ellipse cx="82" cy="218" rx="20" ry="9" fill="#ffe3c2"/><ellipse cx="138" cy="218" rx="20" ry="9" fill="#ffe3c2"/>
+      </svg>
+    </div>
+    <p id="status" class="status-line" aria-live="polite">ចុចលើឆ្មាដើម្បីដាស់វា 🐾</p>
+
+    <div class="mic-row">
+      <button type="button" id="mic-btn" onclick="toggleMic()">🎤 និយាយទៅឆ្មា</button>
+      <button type="button" onclick="jokeNow()">😹 រឿងកំប្លែង</button>
+      <button type="button" id="auto-btn" onclick="toggleAuto()">▶ កំប្លែងរហូត</button>
+      <button type="button" onclick="stopCat()" style="background:linear-gradient(120deg,var(--accent2),#4b3a9a);box-shadow:0 8px 18px rgba(75,58,154,.35)">⏹ ឱ្យឆ្មាស្ងាត់</button>
+    </div>
+    <p id="mic-note" class="warn" role="status"></p>
+   </div>
+
+   <div>
+    <div class="seg" role="radiogroup" aria-label="របៀប">
+      <label><input type="radio" name="mode" value="chat" checked> 🧠 ឆ្លើយកំប្លែង</label>
+      <label><input type="radio" name="mode" value="mimic"> 🦜 ត្រាប់តាមខ្ញុំ</label>
+    </div>
+
+    <div id="chatlog" class="chatlog" aria-live="polite" style="margin-top:12px"></div>
+    <div class="row">
+      <input id="say-input" type="text" placeholder="វាយអ្វីមួយប្រាប់ឆ្មា..." autocomplete="off">
+      <button type="button" onclick="sendText()">ផ្ញើ</button>
+    </div>
+
+    <div class="sliders">
+      <label for="pitch">កម្រិតសម្លេង</label>
+      <input id="pitch" type="range" min="0.6" max="2" step="0.1" value="1.7">
+      <label for="cat-lang">ភាសាឆ្មា</label>
+      <select id="cat-lang">
+        <option value="km-KH">🇰🇭 ខ្មែរ</option>
+        <option value="en-US">🇺🇸 English</option>
+        <option value="fr-FR">🇫🇷 Français</option>
+        <option value="es-ES">🇪🇸 Español</option>
+        <option value="th-TH">🇹🇭 ไทย</option>
+        <option value="vi-VN">🇻🇳 Tiếng Việt</option>
+        <option value="zh-CN">🇨🇳 中文</option>
+        <option value="ja-JP">🇯🇵 日本語</option>
+        <option value="ko-KR">🇰🇷 한국어</option>
+      </select>
+    </div>
+    <div class="togs" style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:.95rem">
+      <label style="display:flex;align-items:center;gap:8px;margin:0"><input type="checkbox" id="voice-toggle" checked style="width:auto;min-height:0"> ឆ្មានិយាយ</label>
+      <label style="display:flex;align-items:center;gap:8px;margin:0"><input type="checkbox" id="chime-toggle" checked style="width:auto;min-height:0"> សំឡេង មៀវ</label>
+    </div>
+
+    <div id="voice-picker" class="voice-picker"></div>
+    <p id="voice-note" class="voice-note" role="status"></p>
+   </div>
+  </div>
+  <p class="honest">ℹ️ ដើម្បីបានសម្លេងខ្មែរ AI ល្អ សូមជ្រើស 🤖 AI Azure ហើយបិទភ្ជាប់ key ឥតគិតថ្លៃ (វាមិនត្រូវបានរក្សាទុកក្នុងកូដទេ គឺនៅក្នុងកុំព្យូទ័ររបស់អ្នកប៉ុណ្ណោះ)។ «ខួរក្បាល» របស់ឆ្មា (ការឆ្លើយកំប្លែង) ជាក្បួនសាមញ្ញក្នុងកូដ មិនមែន AI ពិតទេ។</p>
+ </section>
+</main>
+
+<script src="voice.js"></script>
+<script>
+VoicePicker.langProvider = function () { return document.getElementById("cat-lang").value; };
+// ===== ទិន្នន័យ: មិត្តភក្តិ (ពីទំព័រ fun.html) =====
+let friends = [];
+try { friends = JSON.parse(localStorage.getItem("friends") || "[]"); } catch (e) { friends = []; }
+
+// ===== ខួរក្បាលឆ្មា: ឃ្លាកំប្លែងច្រើន ប្តូររហូត មិនដដែល =====
+// pick() ចាប់ឆ្នោតដោយមិនឱ្យដូចគ្នាទេ រហូតដល់ប្រើអស់ទាំងបញ្ជីសិន
+const decks = new Map();
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a;
+}
+function pick(list) {
+  let d = decks.get(list);
+  if (!d || !d.cards.length) {
+    const cards = shuffle(list.slice());
+    if (d && cards.length > 1 && cards[cards.length - 1] === d.last) cards.unshift(cards.pop());
+    d = { cards: cards, last: d ? d.last : null };
+    decks.set(list, d);
+  }
+  d.last = d.cards.pop();
+  return d.last;
+}
+function has(text, words) { return words.some(function (w) { return text.includes(w); }); }
+
+const JOKES = [
+  "ហេតុអ្វីកុំព្យូទ័រមិនដែលឃ្លាន? ព្រោះវាញ៉ាំ Byte ពេញថ្ងៃ! ហាហា!",
+  "ហេតុអ្វីអ្នកសរសេរកូដចូលចិត្តភាពងងឹត? ព្រោះពន្លឺទាក់ទាញ Bug!",
+  "គេថាឆ្មាមាន ៩ ជីវិត។ ខ្ញុំប្រើអស់ ៨ ទៅលើការដេញកណ្តុរ ហើយនៅសល់ ១ សម្រាប់ដេញត្រី!",
+  "ខ្ញុំសួរកណ្តុរថា ហេតុអ្វីរត់? វាឆ្លើយថា ព្រោះអ្នកមើលខ្ញុំដោយភ្នែកឃ្លាន!",
+  "ម៉ាស៊ីនបោកខោអាវដូចមិត្តពិត ធ្វើឱ្យអ្នកស្អាត តែតែងលេបស្រោមជើងអ្នកម្ខាង!",
+  "ថ្ងៃច័ន្ទជាមិត្តដែលអ្នកមិនបានអញ្ជើញ តែមកគ្រប់សប្តាហ៍!",
+  "ខ្ញុំចង់ធ្វើរបបអាហារ ប៉ុន្តែអាហារបង្កើតមកឱ្យញ៉ាំ មិនមែនឱ្យមើលទេ!",
+  "ទូរស័ព្ទខ្ញុំសុទ្ធតែថ្មខ្សោយ ដូចខ្ញុំអញ្ចឹង ថ្មខ្សោយតាំងពីម៉ោង ៩ ព្រឹក!",
+  "គ្រូពេទ្យប្រាប់ខ្ញុំឱ្យដើរ ១០,០០០ ជំហាន។ ខ្ញុំដើរពីគ្រែទៅទូទឹកកក ៥ ដងហើយ!",
+  "មនុស្សនិយាយថា លុយមិនអាចទិញសុភមង្គលបាន ប៉ុន្តែអាចទិញត្រីបាន ហើយត្រីធ្វើឱ្យខ្ញុំសប្បាយ!",
+  "ខ្ញុំមិនខ្ជិលទេ ខ្ញុំគ្រាន់តែស្ថិតក្នុងរបៀបសន្សំថាមពល!",
+  "ហេតុអ្វីនាឡិកាមិនដែលសប្បាយ? ព្រោះគេបង្វិលវារាល់ថ្ងៃ តែវានៅកន្លែងដដែល!",
+  "ពេលអ៊ីនធឺណិតយឺត ខ្ញុំរៀនអត់ធ្មត់។ ពេលវាលឿន ខ្ញុំភ្លេចអត់ធ្មត់ភ្លាម!",
+  "ខ្ញុំមានគំរោងធំៗ ដូចជាគេងឱ្យបានយូរ និងញ៉ាំឱ្យបានច្រើន!",
+  "ឆ្មាម្នាក់សួរថា ខ្ញុំអាចជួយអ្វីបាន? ម្ចាស់ឆ្លើយថា ជួយចាប់កណ្តុរ។ ឆ្មាថា សុំទោស ខ្ញុំជាឆ្មាក្នុងផ្ទះ ខ្ញុំគ្រាន់តែត្រូវការស្រលាញ់!",
+  "ការគេងលើគ្រែរបស់អ្នក គឺជាការងាររបស់ខ្ញុំ ហើយខ្ញុំធ្វើវាបានល្អណាស់!",
+  "កុំព្យូទ័រខ្ញុំតែងតែប្រាប់ថា មានបញ្ហា ប៉ុន្តែមិនដែលប្រាប់ថាបញ្ហាអ្វីទេ ដូចមនុស្សខ្លះអញ្ចឹង!",
+  "ខ្ញុំសរសេរកូដ ១០០ ជួរ មានកំហុស ១០០ ដង ហើយខ្ញុំរៀនពីរឿងនេះ ១ ដង ដែលខ្ញុំគួរឈប់សរសេរ!",
+  "កណ្តុរមួយប្រាប់ខ្ញុំថា ខ្ញុំមិនខ្លាចឆ្មាទេ។ ខ្ញុំក៏ប្រាប់ថា ល្អណាស់ ព្រោះខ្ញុំក៏មិនខ្លាចកណ្តុរដែរ ខ្ញុំគ្រាន់តែឃ្លាន!",
+  "វិទ្យាសាស្ត្រថា ការសើចល្អសម្រាប់សុខភាព។ ដូច្នេះអ្នកកំពុងចំណាយពេលរស់បន្ថែម ១ វិនាទី ឥឡូវនេះ!",
+  "ខ្ញុំជាប់រវល់ណាស់ ជាមួយការមិនធ្វើអ្វីទាំងអស់!",
+  "មនុស្សចាស់ថា ត្រូវក្រោកពីព្រលឹម។ ខ្ញុំថា ព្រលឹមគឺជាពេលដែលខ្ញុំទើបតែចូលគេង!",
+  "ឆ្កែមួយសួរខ្ញុំថា ហេតុអ្វីឆ្មាខ្ពើមឆ្កែ? ខ្ញុំឆ្លើយថា ព្រោះឆ្កែតែងតែសប្បាយចិត្តពេក វាធ្វើឱ្យខ្ញុំមើលទៅអាក្រក់!",
+  "សួរថា ១ បូក ១ ស្មើប៉ុន្មាន? ខ្ញុំឆ្លើយថា ២ ត្រី! ព្រោះអ្វីៗក៏ដោយគ្រប់ទាំងអស់គិតជាត្រី!",
+  "កាលពីម្សិលមិញខ្ញុំទាក់ទាញមើលកញ្ចក់ ១ ម៉ោង ហើយសន្និដ្ឋានថា ខ្ញុំស្អាតខ្លាំងណាស់!",
+  "ការដេញកន្ទុយខ្លួនឯង គឺជាកីឡាតែមួយគត់ដែលខ្ញុំមិនដែលឈ្នះ!",
+  "មនុស្សចូលចិត្តថតរូបអាហារ។ ខ្ញុំចូលចិត្តញ៉ាំអាហារ មុនពេលអ្នកថតរូបវា!",
+  "ខ្ញុំមិនអួតទេ ប៉ុន្តែខ្ញុំជាឆ្មាដែលស្អាតជាងគេក្នុងចំណោមឆ្មាដែលកំពុងនិយាយជាមួយអ្នក!",
+  "ហេតុអ្វីអ្នកគណិតវិទ្យាសោកសៅ? ព្រោះគាត់មានបញ្ហាច្រើនពេក!",
+  "ខ្ញុំទិញវ៉ាលីមួយ ព្រោះចង់ធ្វើដំណើរ។ ឥឡូវខ្ញុំគេងក្នុងវ៉ាលីនោះ ជាដំណើរដែលល្អបំផុត!"
+];
+const TAILS = ["... មៀវ!", " ហាហា!", " ហិហិ!", " មៀវមៀវ!", " ខ្ញុំសើចរហូតទ្រូងឈឺ!", " ប្រាប់អ្នកផ្សេងមិនបានទេណា!", ""];
+
+const RULES = [
+  { keys: ["សួស្តី", "ជម្រាបសួរ", "hello", "hi", "ហេ"], say: [
+    "មៀវ! សួស្តី! ខ្ញុំរង់ចាំអ្នកយូរហើយ ទាល់តែឃ្លានត្រី!",
+    "សួស្តី! ខ្ញុំជាឆ្មាឆ្លាតជាងគេក្នុងភូមិ ទោះបីគេមិនទាន់ដឹងក៏ដោយ!",
+    "ហេ! អ្នកមកទាន់ពេលហើយ ខ្ញុំកំពុងគ្មានអ្វីធ្វើ ក្រៅពីគេង!",
+    "សូមស្វាគមន៍មកកាន់ផ្ទះឆ្មា សូមទុកស្បែកជើងខាងក្រៅ ព្រោះខ្ញុំចង់ដេកលើវា!",
+    "ជម្រាបសួរ! ខ្ញុំទើបភ្ញាក់ពីគេង ១៥ ម៉ោង ហត់ណាស់!",
+    "មៀវៗ! បាត់មុខយូរហើយ ខ្ញុំស្ទើរតែភ្លេចអ្នក ដូចខ្ញុំភ្លេចកន្លែងលាក់ត្រី!",
+    "សួស្តី! ខ្ញុំមិនឈ្លានពានទេ ខ្ញុំគ្រាន់តែឃ្លានប៉ុណ្ណោះ!",
+    "ហ្ហេ៎! អ្នកមកហើយ ខ្ញុំនឹងធ្វើពុតជាមិនសប្បាយចិត្ត តែសាមញ្ញណាស់ ខ្ញុំសប្បាយណាស់!"] },
+  { keys: ["ឈ្មោះ", "name"], say: [
+    "ខ្ញុំឈ្មោះមៀវមៀវ! ចុះអ្នកវិញ ឈ្មោះអ្វី? កុំប្រាប់ថាឈ្មោះ ត្រី ណា!",
+    "ឈ្មោះខ្ញុំឆ្មាធំ ព្រោះខ្ញុំញ៉ាំច្រើន!",
+    "គេហៅខ្ញុំថា ស្តេចឆ្មា តែខ្ញុំហៅខ្លួនឯងថា បុរសស្អាតបំផុតក្នុងភូមិ!",
+    "ឈ្មោះខ្ញុំវែងណាស់ តែអ្នកអាចហៅខ្ញុំថា ឆ្មាទី១ ឬ ឆ្មាស្អាត!",
+    "ខ្ញុំគ្មានឈ្មោះទេ ព្រោះខ្ញុំមិនឆ្លើយពេលគេហៅ!",
+    "ខ្ញុំឈ្មោះ Mr. Whiskers ពីវាំងចិញ្ចើមរោម! ខ្ញុំគ្រាន់តែបង្កើតវាអម្បាញ់មិញ!"] },
+  { keys: ["ឃ្លាន", "បាយ", "ញ៉ាំ", "ត្រី", "food", "ម្ហូប"], say: [
+    "ខ្ញុំក៏ឃ្លានដែរ! យើងទៅរកត្រីអាំងទៅ!",
+    "បាយ? ខ្ញុំចូលចិត្តត្រី មិនមែនបាយទេ មៀវ!",
+    "ខ្ញុំទើបញ៉ាំរួច ៥ នាទីមុន តែឥឡូវនេះឃ្លានទៀតហើយ ចម្លែកណាស់!",
+    "មានត្រីអត់? បើអត់ទេ ខ្ញុំនឹងបោះបង់មិត្តភាពនេះ ១ នាទី!",
+    "ម្ហូបឆ្ងាញ់បំផុតគឺម្ហូបដែលអ្នកផ្សេងចែកឱ្យខ្ញុំ!",
+    "ខ្ញុំរៀបចំរបបអាហារហើយ គឺ ញ៉ាំអ្វីដែលមាន ឱ្យបានច្រើនបំផុត!",
+    "បើអ្នកឃ្លាន សូមចំណាយពេលគិតពីខ្ញុំ ព្រោះខ្ញុំឃ្លានជាងអ្នក ១០ ដង!",
+    "ញ៉ាំអ្វីខ្លះ? ខ្ញុំសុំចែករំលែកផង ខ្ញុំជាមិត្តល្អ ដែលចូលចិត្តចែករំលែកអាហាររបស់អ្នក!"] },
+  { keys: ["ស្រលាញ់", "love", "ចូលចិត្ត"], say: [
+    "ខ្ញុំក៏ស្រលាញ់អ្នកដែរ ប៉ុន្តែស្រលាញ់ត្រីជាងបន្តិច!",
+    "ឯ៎ ខ្មាស់អៀនហើយ មៀវ! មុខខ្ញុំក្រហមក្រោមរោមហើយ!",
+    "ចិត្តខ្ញុំលោតញាប់ ឬគ្រាន់តែខ្ញុំទើបតែរត់ដេញកណ្តុរ?",
+    "ខ្ញុំស្រលាញ់អ្នក ដូចអ្នកស្រលាញ់ការគេងថ្ងៃអាទិត្យ!",
+    "ការស្រលាញ់គឺ ពេលខ្ញុំអនុញ្ញាតឱ្យអ្នកអង្គុយក្បែរខ្ញុំ!",
+    "ខ្ញុំមិនដឹងថាអ្វីជាស្នេហាទេ ប៉ុន្តែដឹងថាត្រីឆ្ងាញ់!"] },
+  { keys: ["គេង", "ងងុយ", "sleep", "ហត់"], say: [
+    "ខ្ញុំគេងបាន ១៦ ម៉ោងមួយថ្ងៃ អ្នកមិនអាចយកឈ្នះខ្ញុំទេ!",
+    "ហឺៗ... ខ្ញុំងងុយគេងហើយ ប៉ុន្តែសូមគេងបន្តិចទៀត!",
+    "គេងគឺជាអាជីពរបស់ខ្ញុំ ហើយខ្ញុំជាអ្នកជំនាញ!",
+    "ខ្ញុំគេងពេលថ្ងៃ គេងពេលយប់ គេងពេលអាហារ ហើយបើអាច គេងក្នុងសុបិនទៀត!",
+    "អ្នកហត់ឬ? ខ្ញុំក៏ហត់ដែរ ទោះបីខ្ញុំមិនបានធ្វើអ្វីទាំងអស់!",
+    "ពេលណាមិនចាំបាច់គេង? ពេលនោះខ្ញុំកំពុងគេងរួចហើយ!"] },
+  { keys: ["កំប្លែង", "សើច", "joke", "ហាហា", "ហិហិ"], say: JOKES },
+  { keys: ["អរគុណ", "thank"], say: [
+    "មិនអីទេ! ឱ្យត្រីខ្ញុំមួយក៏បានដែរ មៀវ!",
+    "ការស្វាគមន៍! ខ្ញុំអាចជួយបាន ព្រោះខ្ញុំស្រេចតែទទួលសរសើរ!",
+    "អរគុណវិញ! ខ្ញុំគិតថាអ្នកគួរឱ្យត្រីខ្ញុំជាអំណរគុណ!",
+    "មិនបាច់អរគុណទេ គ្រាន់តែលួងខ្ញុំ ៥ នាទីបានហើយ!",
+    "ត្រឹមតែអ្នកនិយាយជាមួយខ្ញុំ ខ្ញុំសប្បាយចិត្តណាស់!"] },
+  { keys: ["សុំទោស", "sorry"], say: [
+    "ខ្ញុំអត់ទោសឱ្យ ប៉ុន្តែអ្នកត្រូវលួងខ្ញុំដោយត្រីមួយ!",
+    "អត់អីទេ! ខ្ញុំភ្លេចហើយ ព្រោះខ្ញុំមានអនុស្សាវរីយ៍ ៥ វិនាទី!",
+    "សុំទោសមិនគ្រប់គ្រាន់ទេ ត្រូវមានការឱ្យអាហារបន្ថែម!",
+    "ខ្ញុំមិនខឹងទេ ខ្ញុំគ្រាន់តែធ្វើពុតជាបែបនេះ ដើម្បីទទួលបានត្រី!",
+    "ទោសអ្នកត្រូវបានអត់ឱនទោស តែអ្នកនៅជំពាក់ខ្ញុំ ១ ត្រី!"] },
+  { keys: ["អ្នកណា", "who", "ជាអ្វី"], say: [
+    "ខ្ញុំជាឆ្មាដ៏ល្បីបំផុតក្នុង JavaScript! មៀវ!",
+    "ខ្ញុំជាឆ្មាដែលមិនមែនជាឆ្មាធម្មតា ខ្ញុំជាឆ្មាដែលនិយាយបាន!",
+    "ខ្ញុំជាបុរសកំប្លែង ក្នុងរូបឆ្មា!",
+    "ខ្ញុំគឺជាអ្នកអាចារ្យ អ្នកប្រាជ្ញ និងអ្នកញ៉ាំត្រី!",
+    "ខ្ញុំជាមិត្តរបស់អ្នក ហើយខ្ញុំជាអ្នកដែលចូលចិត្តអាហារ!"] },
+  { keys: ["ហ្គេម", "លេង", "game"], say: [
+    "ចូលចិត្តហ្គេម! តែខ្ញុំចូលចិត្តដេញកណ្តុរជាងគេ!",
+    "ហ្គេមដែលខ្ញុំចូលចិត្តបំផុតគឺ ទម្លាក់របស់ពីលើតុ ហើយមើលមុខម្ចាស់!",
+    "លេងលាក់ខ្លួនក្នុងប្រអប់ ខ្ញុំជាអ្នកឈ្នះរាល់ដង ព្រោះអ្នកមិនអាចរកខ្ញុំឃើញ!",
+    "ខ្ញុំមិនចាញ់ទេ ខ្ញុំគ្រាន់តែផ្លាស់ប្តូរច្បាប់!",
+    "អ្នកចង់លេងអ្វី? ខ្ញុំអាចលេងគេង ឬលេងញ៉ាំ!",
+    "ហ្គេមដែលខ្ញុំពូកែបំផុតគឺ គេងឱ្យបានយូរជាងគេ!"] },
+  { keys: ["ល្អ", "ពូកែ", "ស្អាត", "ឆ្លាត"], say: [
+    "មៀវ! អរគុណ ខ្ញុំដឹងហើយថាខ្ញុំស្អាត!",
+    "អ្នកក៏ពូកែដែរ! តែខ្ញុំពូកែជាងបន្តិច ហាហា!",
+    "សរសើរបន្តទៀតមក ខ្ញុំមិនធុញទេ!",
+    "ខ្ញុំដឹងថាខ្ញុំអស្ចារ្យ ប៉ុន្តែស្តាប់ពីអ្នកនិយាយ ធ្វើឱ្យខ្ញុំអស្ចារ្យជាងមុន!",
+    "អ្នកមានភ្នែកល្អណាស់ ទើបឃើញភាពស្អាតរបស់ខ្ញុំ!",
+    "ខ្ញុំកំពុងធ្វើមុខមិនអើពើ ប៉ុន្តែខាងក្នុងខ្ញុំរីករាយណាស់!"] },
+  { keys: ["ធ្វើអី", "កំពុងធ្វើ"], say: [
+    "ខ្ញុំកំពុងគិតពីត្រី ហើយក៏កំពុងស្តាប់អ្នកនិយាយ!",
+    "ខ្ញុំកំពុងធ្វើជាអ្នកមិនធ្វើអ្វី ហើយខ្ញុំពូកែណាស់!",
+    "ខ្ញុំកំពុងរៀបចំផែនការគេង ១៦ ម៉ោង!",
+    "ខ្ញុំកំពុងមើលអ្នក ហើយវិនិច្ឆ័យជីវិតរបស់អ្នក!",
+    "ខ្ញុំកំពុងធ្វើជាបុរសសំខាន់ ជុំវិញផ្ទះនេះ!",
+    "ខ្ញុំកំពុងសម្លឹងមើលចំណុចមួយ ដែលអ្នកមើលមិនឃើញ ដើម្បីធ្វើឱ្យអ្នកភ័យ!"] },
+  { keys: ["រៀន", "សាលា", "កូដ", "code", "កុំព្យូទ័រ", "javascript"], say: [
+    "រៀនកូដមែនទេ? ពូកែណាស់! ចាំរហូតដល់អ្នកឃើញ Bug ដំបូង នោះអ្នកនឹងយល់ពីការឈឺចាប់របស់ខ្ញុំ!",
+    "ខ្ញុំជួយអ្នករៀន JavaScript បាន! ជួយប្រាប់ថា ក្រោយកូដ សូមសម្រាកញ៉ាំត្រី!",
+    "កូដរបស់អ្នកដំណើរការទេ? ប្រសិនបើអត់ ខ្ញុំសូមស្នើសុំគេងសិន សឹមដោះស្រាយ!",
+    "អ្នកសរសេរកូដឆ្នាំសិក្សានេះ ខ្ញុំក៏សរសេរបែបនេះដែរ គឺ សរសេរហើយលុបវិញ!",
+    "សាលាគឺជាកន្លែងដែលខ្ញុំមិនចង់ទៅ ព្រោះគ្មានកន្លែងគេង!"] },
+  { keys: ["ក្តៅ", "ត្រជាក់", "ភ្លៀង", "ថ្ងៃ", "អាកាស"], say: [
+    "អាកាសធាតុថ្ងៃនេះល្អសម្រាប់គេង ដូចរាល់ថ្ងៃដែរ!",
+    "ក្តៅណាស់! ខ្ញុំត្រូវសម្រាក នៅក្រោមកង្ហារ ១០ ម៉ោង!",
+    "ភ្លៀង? ខ្ញុំនៅក្នុងផ្ទះ ព្រោះខ្ញុំជាឆ្មា ដែលមិនចូលចិត្តទឹក!",
+    "ថ្ងៃនេះល្អ ប៉ុន្តែល្អជាងបើមានត្រី!"] },
+  { keys: ["លុយ", "ប្រាក់", "ថ្លៃ"], say: [
+    "ខ្ញុំគ្មានលុយទេ ប៉ុន្តែមានគុណតម្លៃច្រើន ដូចជាការគេង!",
+    "លុយទិញបានអ្វី? ទិញត្រីបាន! ដូច្នេះលុយគឺល្អ!",
+    "ខ្ញុំជាឆ្មាក្រីក្រ ប៉ុន្តែស្អាតដូចសេដ្ឋី!",
+    "ប្រសិនបើខ្ញុំមានលុយ ខ្ញុំនឹងទិញគ្រែមួយធំជាងផ្ទះ!"] },
+  { keys: ["ឆ្កែ", "dog"], say: [
+    "ឆ្កែ? ខ្ញុំមិនខ្លាចទេ... ខ្ញុំត្រូវរត់ទៅគេងលើដំបូលសិន!",
+    "ឆ្កែចូលចិត្តលេងយកអ្វីបោះ ខ្ញុំចូលចិត្តបោះអ្វីពីលើតុ!",
+    "ខ្ញុំជាមិត្តរបស់ឆ្កែ ក្នុងរយៈ ៥ វិនាទីដំបូង!",
+    "ឆ្កែស្មោះត្រង់ ខ្ញុំស្មោះត្រង់ចំពោះតែត្រី!"] }
+];
+const FALLBACK = [
+  "មៀវ? ខ្ញុំស្តាប់មិនបានច្បាស់ ព្រោះត្រចៀកខ្ញុំមានរោម!",
+  "ហាហា អ្នកនិយាយអ្វីអញ្ចឹង? ខ្ញុំសើចរហូតបាត់ពុកចង្ការ!",
+  "ប្រាប់ខ្ញុំម្តងទៀតមក ខ្ញុំកំពុងគិតពីត្រី!",
+  "ពាក្យនេះពិបាកពេក ខ្ញុំត្រូវទៅគេងសិន មៀវ!",
+  "អូហូ! គួរឱ្យចាប់អារម្មណ៍ណាស់... ខ្ញុំមិនយល់សោះ តែខ្ញុំធ្វើពុតថាយល់!",
+  "ខ្ញុំកំពុងគិត... ហើយខ្ញុំគិតថា ខ្ញុំគួរតែគេង!",
+  "សំណួរនេះពិបាកណាស់ ខ្ញុំត្រូវសួរព្រះអាទិត្យ ឬត្រីមួយមុន!",
+  "ហ៊ឺម... អ្នកអាចនិយាយថា ត្រី ម្តងទៀតបានទេ? ខ្ញុំមិនស្តាប់អ្វីផ្សេងទេ!",
+  "ខ្ញុំធ្វើមុខឆ្លាត តែតាមពិតខ្ញុំគ្មានដឹងសោះ!",
+  "មៀវមៀវមៀវ... នោះគឺជាភាសាឆ្មា សម្រាប់ថា ខ្ញុំអស់គំនិតហើយ!",
+  "អ្នកធ្វើឱ្យខ្ញុំច្របូកច្របល់ ដូចពេលខ្ញុំឃើញអំពូលភ្លើងក្រហម!",
+  "ខ្ញុំមិនយល់ទេ ប៉ុន្តែខ្ញុំអាចប្រាប់រឿងកំប្លែងបាន! ចង់ស្តាប់ទេ? ចុចប៊ូតុងរឿងកំប្លែង!"
+];
+const TEASE = [
+  "{f}! ឮឈ្មោះនេះខ្ញុំដឹងភ្លាមថាអ្នកនេះគួរឱ្យស្រលាញ់ណាស់ តែប្រយ័ត្នគាត់ទាញកន្ទុយខ្ញុំ!",
+  "{f} ឬ? ឮថាគាត់គេងយូរជាងខ្ញុំទៅទៀត ហាហា!",
+  "សួរសុខទុក្ខ {f} ជួយខ្ញុំផង ហើយប្រាប់គាត់ថាខ្ញុំចង់បានត្រី!",
+  "{f} ជាមនុស្សពូកែ តែពូកែបំផុតក្នុងការមិនចែកត្រីឱ្យខ្ញុំ!",
+  "ខ្ញុំឮថា {f} ចូលចិត្តសើច ខ្ញុំក៏ចូលចិត្តដែរ មកសើចជាមួយគ្នា!",
+  "{f}! ខ្ញុំសូមប្រកាសថា អ្នកគឺជាមិត្តល្អ ប៉ុន្តែអ្នកនៅមិនទាន់ឱ្យត្រីខ្ញុំ!",
+  "អូ {f}! គាត់ជាអ្នកលេងល្បែងពូកែ តែខ្ញុំជាអ្នកគេងពូកែជាង!",
+  "ខ្ញុំយល់សប្តិឃើញ {f} ឱ្យត្រីខ្ញុំមួយធុង! សូមធ្វើឱ្យក្តីសុបិននោះពិត!",
+  "{f} ជាអ្នកដែលមិនដែលភ្លេចមើលថែខ្ញុំ... ហើយខ្ញុំក៏មិនដែលភ្លេចហូបដែរ!",
+  "ប្រាប់ {f} ថា ឆ្មាមួយក្បាលនឹកគាត់ ហើយនឹកអាហារដែលគាត់មាន!"
+];
+
+
+// ===== ភាសាផ្សេង: ឆ្មានិយាយកំប្លែងជាភាសាដែលជ្រើស =====
+function getLang() { return document.getElementById("cat-lang").value; }
+const LANGPACK = {
+  en: { hi: ["Meow! Hello there, human!", "Hi! I was napping, but I woke up for you. Barely.", "Greetings! Please bring snacks."],
+    jokes: ["Why do cats love computers? To keep an eye on the mouse!", "I'm not lazy. I'm in energy-saving mode.", "I knocked a glass off the table. Gravity works. You're welcome, science!", "What do you call a pile of cats? A meow-ntain!", "They say cats have nine lives. I used eight of them on naps.", "I told my human I'm on a diet. Now I only eat when I'm hungry, which is always."],
+    fb: ["Meow? Say that again, my ears are fluffy.", "I don't understand, but I'll pretend I do.", "Is that about food? If not, I'm not interested."] },
+  fr: { hi: ["Miaou ! Salut, humain !", "Bonjour ! Je dormais, mais pour toi je me réveille. À peine."],
+    jokes: ["Pourquoi les chats aiment l'ordinateur ? Pour surveiller la souris !", "Je ne suis pas paresseux, je suis en mode économie d'énergie.", "J'ai fait tomber un verre de la table. La gravité fonctionne, de rien !", "On dit que les chats ont neuf vies. J'en ai déjà utilisé huit pour dormir."],
+    fb: ["Miaou ? Répète, mes oreilles sont pleines de poils.", "Je ne comprends pas, mais je fais semblant."] },
+  es: { hi: ["¡Miau! ¡Hola, humano!", "Hola, estaba durmiendo, pero me desperté por ti. Casi."],
+    jokes: ["¿Por qué los gatos aman la computadora? ¡Para vigilar al ratón!", "No soy perezoso, estoy en modo ahorro de energía.", "Tiré un vaso de la mesa. La gravedad funciona, ¡de nada!", "Dicen que los gatos tienen siete vidas. Yo ya gasté seis durmiendo."],
+    fb: ["¿Miau? Repítelo, mis orejas son muy peludas.", "No entiendo, pero finjo que sí."] },
+  th: { hi: ["เหมียว! สวัสดีมนุษย์!", "สวัสดี ฉันกำลังงีบอยู่ แต่ตื่นมาเพื่อคุณ แทบจะ"],
+    jokes: ["ทำไมแมวชอบคอมพิวเตอร์? เพราะอยากเฝ้าดูเมาส์!", "ฉันไม่ได้ขี้เกียจ ฉันอยู่ในโหมดประหยัดพลังงาน", "ฉันปัดแก้วตกโต๊ะ แรงโน้มถ่วงใช้ได้จริง ไม่ต้องขอบคุณ!", "เขาว่าแมวมีเก้าชีวิต ฉันใช้ไปแปดชีวิตกับการนอนแล้ว"],
+    fb: ["เหมียว? พูดอีกทีสิ หูฉันมีขนเยอะ", "ฉันไม่เข้าใจ แต่แกล้งทำเป็นเข้าใจ"] },
+  vi: { hi: ["Meo! Xin chào, con người!", "Chào bạn! Mình đang ngủ nhưng thức dậy vì bạn. Gần như vậy."],
+    jokes: ["Sao mèo thích máy tính? Để canh chừng con chuột!", "Tôi không lười, tôi đang ở chế độ tiết kiệm năng lượng.", "Tôi làm rơi ly khỏi bàn. Trọng lực hoạt động tốt, không có gì!", "Người ta nói mèo có chín mạng, tôi đã dùng tám mạng để ngủ rồi."],
+    fb: ["Meo? Nói lại đi, tai tôi nhiều lông lắm.", "Tôi không hiểu, nhưng tôi giả vờ hiểu."] },
+  zh: { hi: ["喵!你好,人类!", "你好!我在打盹,但为了你我醒了。差不多吧。"],
+    jokes: ["为什么猫喜欢电脑?因为可以盯着鼠标!", "我不是懒,我是在节能模式。", "我把杯子从桌上推下去了。重力有效,不客气!", "据说猫有九条命,我已经用了八条来睡觉了。"],
+    fb: ["喵?再说一遍,我的耳朵毛太多了。", "我听不懂,但我假装听懂了。"] },
+  ja: { hi: ["にゃー!こんにちは、人間さん!", "やあ!昼寝してたけど、君のために起きたよ。ほとんどね。"],
+    jokes: ["なぜ猫はパソコンが好きなの?マウスを見張れるからさ!", "怠けてるんじゃないよ、省エネモードなんだ。", "コップをテーブルから落としたよ。重力は本物だね、どういたしまして!", "猫には九つの命があるっていうけど、八つは昼寝に使っちゃった。"],
+    fb: ["にゃ?もう一回言って、耳に毛が多いんだ。", "よくわからないけど、わかったふりをするよ。"] },
+  ko: { hi: ["야옹! 안녕, 인간!", "안녕! 낮잠 자고 있었는데 너를 위해 일어났어. 거의."],
+    jokes: ["고양이는 왜 컴퓨터를 좋아할까? 마우스를 감시하려고!", "나는 게으른 게 아니야, 절전 모드일 뿐이야.", "컵을 탁자에서 떨어뜨렸어. 중력은 진짜야, 천만에!", "고양이는 목숨이 아홉 개라는데, 여덟 개는 낮잠 자는 데 썼어."],
+    fb: ["야옹? 다시 말해 줘, 내 귀에 털이 많아.", "이해는 안 되지만 이해한 척할게."] }
+};
+const HI_WORDS = ["hello", "hi", "hey", "hola", "bonjour", "salut", "สวัสดี", "xin chào", "你好", "こんにちは", "안녕"];
+function packOf(lang) { return LANGPACK[/^zh/.test(lang) ? "zh" : lang.slice(0, 2)]; }
+function langBrain(text, lang) {
+  const p = packOf(lang), t = text.toLowerCase();
+  if (has(t, HI_WORDS)) return pick(p.hi);
+  return Math.random() < 0.7 ? pick(p.jokes) : pick(p.fb);
+}
+
+function brain(text) {
+  if (!getLang().startsWith("km")) return langBrain(text, getLang());
+  const t = text.toLowerCase();
+  for (const f of friends) {
+    if (f && t.includes(f.toLowerCase())) return pick(TEASE).split("{f}").join(f);
+  }
+  if (friends.length && has(t, ["មិត្ត", "friend"])) return pick(TEASE).split("{f}").join(pick(friends));
+  let out = null;
+  for (const r of RULES) if (has(t, r.keys)) { out = pick(r.say); break; }
+  if (!out) out = pick(FALLBACK);
+  return out;
+}
+function mimic(text) { return text + (getLang().startsWith("km") ? pick(TAILS) : pick(["... meow!", " haha!", "!", ""])); }
+function tellJoke() { return getLang().startsWith("km") ? pick(JOKES) : pick(packOf(getLang()).jokes); }
+
+// ===== សំឡេង មៀវ (Web Audio) =====
+let audioCtx = null;
+function meow() {
+  if (!document.getElementById("chime-toggle").checked) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  audioCtx = audioCtx || new AC();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  const t = audioCtx.currentTime, o = audioCtx.createOscillator(), g = audioCtx.createGain(), f = audioCtx.createBiquadFilter();
+  o.type = "sawtooth";
+  o.frequency.setValueAtTime(520, t);
+  o.frequency.exponentialRampToValueAtTime(950, t + 0.18);
+  o.frequency.exponentialRampToValueAtTime(420, t + 0.6);
+  f.type = "bandpass"; f.Q.value = 3;
+  f.frequency.setValueAtTime(900, t);
+  f.frequency.exponentialRampToValueAtTime(2200, t + 0.2);
+  f.frequency.exponentialRampToValueAtTime(900, t + 0.6);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.35, t + 0.06);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.65);
+  o.connect(f).connect(g).connect(audioCtx.destination);
+  o.start(t); o.stop(t + 0.7);
+  setMouth(true); setTimeout(function () { setMouth(false); }, 650);
+}
+
+// ===== ឆ្មា =====
+const catEl = document.getElementById("cat");
+const statusEl = document.getElementById("status");
+let mouthTimer = null;
+function setMouth(on) { catEl.classList.toggle("talking", on); }
+
+function pokeCat() {
+  catEl.classList.remove("poked"); void catEl.getBoundingClientRect(); catEl.classList.add("poked");
+  meow();
+  statusEl.textContent = pick(["អូយ! កុំចុចខ្ញុំអី មៀវ!", "ហិហិ គ្រលួច!", "មៀវ! ខ្ញុំភ្ញាក់ហើយ!"]);
+}
+let autoOn = false;
+function jokeNow() { stopAuto(); say(tellJoke()); }
+function autoLoop() {
+  if (!autoOn) return;
+  say(tellJoke(), function () { if (autoOn) setTimeout(autoLoop, 1500); });
+}
+function toggleAuto() {
+  const btn = document.getElementById("auto-btn");
+  autoOn = !autoOn;
+  btn.textContent = autoOn ? "⏸ ឈប់កំប្លែង" : "▶ កំប្លែងរហូត";
+  if (autoOn) autoLoop(); else stopCat();
+}
+function stopAuto() {
+  autoOn = false;
+  const btn = document.getElementById("auto-btn");
+  if (btn) btn.textContent = "▶ កំប្លែងរហូត";
+}
+function stopCat() {
+  stopAuto();
+  VoicePicker.stop();
+  clearTimeout(mouthTimer);
+  setMouth(false);
+  statusEl.textContent = "ឆ្មាស្ងាត់ហើយ 🤫";
+}
+function addMsg(who, text) {
+  const log = document.getElementById("chatlog");
+  const d = document.createElement("div");
+  d.className = "msg " + who;
+  d.textContent = (who === "cat" ? "🐱 " : "") + text;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+function say(text, onFinish) {
+  addMsg("cat", text);
+  meow();
+  clearTimeout(mouthTimer);
+  const finish = function () { if (onFinish) { const f = onFinish; onFinish = null; f(); } };
+  if (!document.getElementById("voice-toggle").checked) { setTimeout(finish, Math.min(text.length * 60 + 800, 6000)); return; }
+  statusEl.textContent = "ឆ្មាកំពុងនិយាយ...";
+  const stopTalking = function () { setMouth(false); statusEl.textContent = ""; finish(); };
+  setTimeout(function () {
+    VoicePicker.speak(text, getLang(), {
+      pitch: parseFloat(document.getElementById("pitch").value),
+      onstart: function () { setMouth(true); },
+      onend: stopTalking
+    });
+    // បើគ្មានសម្លេង ឱ្យមាត់រើតាមប្រវែងអត្ថបទ
+    mouthTimer = setTimeout(function () { setMouth(true); mouthTimer = setTimeout(stopTalking, Math.min(text.length * 70, 7000)); }, 400);
+  }, 700);
+}
+function handleUser(text) {
+  stopAuto();
+  text = text.trim();
+  if (!text) return;
+  addMsg("me", text);
+  const mode = document.querySelector('input[name="mode"]:checked').value;
+  say(mode === "mimic" ? mimic(text) : brain(text));
+}
+function sendText() {
+  const input = document.getElementById("say-input");
+  handleUser(input.value);
+  input.value = "";
+  input.focus();
+}
+document.getElementById("say-input").addEventListener("keydown", function (e) { if (e.key === "Enter") sendText(); });
+
+// ===== ស្តាប់សម្លេងអ្នក (Speech Recognition) =====
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, listening = false;
+function toggleMic() {
+  const note = document.getElementById("mic-note");
+  const btn = document.getElementById("mic-btn");
+  if (!SR) { note.textContent = "កម្មវិធីរុករកនេះមិនគាំទ្រការស្តាប់សម្លេងទេ។ សូមប្រើ Chrome ឬ Edge ហើយអាចវាយអត្ថបទជំនួសបាន។"; return; }
+  if (listening && rec) { rec.stop(); return; }
+  rec = new SR();
+  rec.lang = getLang();
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+  rec.onstart = function () { listening = true; btn.classList.add("mic-on"); btn.textContent = "🔴 កំពុងស្តាប់..."; note.textContent = ""; };
+  rec.onresult = function (e) { handleUser(e.results[0][0].transcript); };
+  rec.onerror = function (e) {
+    const m = { "not-allowed": "សូមអនុញ្ញាតឱ្យប្រើមីក្រូហ្វូន។ បើបើកឯកសារដោយផ្ទាល់ (file://) សូមបើកតាម localhost វិញ។",
+                "no-speech": "មិនឮសម្លេងទេ សូមសាកល្បងម្តងទៀត។",
+                "language-not-supported": "កម្មវិធីរុករកមិនគាំទ្រភាសានេះសម្រាប់ស្តាប់ទេ។" };
+    note.textContent = m[e.error] || ("មានបញ្ហា: " + e.error);
+  };
+  rec.onend = function () { listening = false; btn.classList.remove("mic-on"); btn.textContent = "🎤 និយាយទៅឆ្មា"; };
+  rec.start();
+}
+
+// ===== ចលនាផ្ទៃខាងក្រោយ =====
+(function () {
+  const box = document.getElementById("sparks");
+  for (let i = 0; i < 22; i++) {
+    const s = document.createElement("i");
+    s.className = "spark";
+    s.style.left = Math.random() * 100 + "%";
+    s.style.animationDuration = 9 + Math.random() * 12 + "s";
+    s.style.animationDelay = -Math.random() * 20 + "s";
+    s.style.transform = "scale(" + (0.6 + Math.random() * 1.4) + ")";
+    box.appendChild(s);
+  }
+  document.querySelectorAll("button").forEach(function (b) {
+    b.classList.add("ripple");
+    b.addEventListener("click", function (e) {
+      const r = b.getBoundingClientRect(), size = Math.max(r.width, r.height) / 2, s = document.createElement("span");
+      s.className = "r";
+      s.style.cssText = "width:" + size + "px;height:" + size + "px;left:" + (e.clientX - r.left - size / 2) + "px;top:" + (e.clientY - r.top - size / 2) + "px";
+      b.appendChild(s); setTimeout(function () { s.remove(); }, 600);
+    });
+  });
+})();
+
+addMsg("cat", "មៀវ! ខ្ញុំជាឆ្មាអាចារ្យ។ និយាយអ្វីមួយមក ហើយខ្ញុំនឹងធ្វើឱ្យអ្នកសើច!");
+</script>
+</body>
+</html>

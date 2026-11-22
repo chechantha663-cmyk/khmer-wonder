@@ -1,0 +1,284 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated user's saved Khmer Wonder Studio progress, theme preference, story stars, friends list, and best runner game score.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "themeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40,
+          "enum": [
+            "angkor-amber",
+            "emerald-forest",
+            "mekong-azure",
+            "sunset-meadow",
+            "starry-night",
+            "golden-courtyard"
+          ]
+        },
+        "starsMap": {
+          "type": "object",
+          "description": "Map of story IDs to best star ratings (0-3), bounded to 100 stories."
+        },
+        "friends": {
+          "type": "array",
+          "description": "Bounded list of friend nicknames for the spin wheel (max 30)."
+        },
+        "bestGameScore": {
+          "type": "integer",
+          "description": "Highest score achieved in Angkor Lotus Run."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "displayName", "themeId", "starsMap", "friends", "bestGameScore", "createdAt", "updatedAt"]
+    },
+    "CustomStory": {
+      "title": "CustomStory",
+      "description": "Admin-authored interactive Khmer story (life wisdom, mystery deduction, or folktale) with animated scenes, quiz pool, and reflection poem.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "moral": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "category": {
+          "type": "string",
+          "enum": ["wisdom", "mystery", "folktale"]
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": ["easy", "hard"]
+        },
+        "coverMood": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "enum": ["angkor", "forest", "river", "sunset", "night", "courtyard"]
+        },
+        "chars": {
+          "type": "array",
+          "description": "Two character emoji tokens (exact length 2)."
+        },
+        "scenes": {
+          "type": "array",
+          "description": "1 to 12 animated story scene objects."
+        },
+        "quizPool": {
+          "type": "array",
+          "description": "1 to 8 quiz question objects."
+        },
+        "poem": {
+          "type": "array",
+          "description": "1 to 10 moral poem / reflection lines."
+        },
+        "published": {
+          "type": "boolean",
+          "description": "Controls whether the story is publicly visible to visitors."
+        },
+        "authorUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["title", "moral", "coverMood", "chars", "scenes", "quizPool", "poem", "published", "authorUid", "createdAt", "updatedAt"]
+    },
+    "VisitLog": {
+      "title": "VisitLog",
+      "description": "Anonymous or signed-in page visit telemetry readable exclusively by Admin for visitor analytics.",
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "section": {
+          "type": "string",
+          "enum": ["HOME", "STORIES", "GAME3D", "WORDS", "CAT", "FRIENDS", "MATH"]
+        },
+        "visitorType": {
+          "type": "string",
+          "enum": ["guest", "user"]
+        },
+        "visitorName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "dayKey": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 10,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["sessionId", "section", "visitorType", "visitorName", "dayKey", "createdAt"]
+    },
+    "GameScore": {
+      "title": "GameScore",
+      "description": "Leaderboard entry for Angkor Lotus Run game sessions.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "playerName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "score": {
+          "type": "integer"
+        },
+        "lotuses": {
+          "type": "integer"
+        },
+        "distance": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "playerName", "score", "lotuses", "distance", "createdAt"]
+    },
+    "VoiceTranscript": {
+      "title": "VoiceTranscript",
+      "description": "Admin-private saved audio transcription generated via gemini-3.5-transcribe.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "transcript": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000
+        },
+        "language": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "durationSec": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "title", "transcript", "language", "durationSec", "createdAt"]
+    },
+    "VideoRecord": {
+      "title": "VideoRecord",
+      "description": "Admin-private metadata log for story videos generated with gemini-omni-1.2-flash.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "aspectRatio": {
+          "type": "string",
+          "enum": ["16:9", "9:16"]
+        },
+        "duration": {
+          "type": "string",
+          "enum": ["5s", "8s", "10s"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "prompt", "aspectRatio", "duration", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Owner-private user studio progress and preferences; Admin may inspect non-PII progress summary."
+    },
+    "/users/{userId}/transcripts/{transcriptId}": {
+      "schema": { "$ref": "#/entities/VoiceTranscript" },
+      "description": "Admin-private saved voice transcriptions."
+    },
+    "/users/{userId}/videoPrompts/{videoId}": {
+      "schema": { "$ref": "#/entities/VideoRecord" },
+      "description": "Admin-private generated video prompt history."
+    },
+    "/stories/{storyId}": {
+      "schema": { "$ref": "#/entities/CustomStory" },
+      "description": "Admin-authored interactive Khmer stories; published stories are publicly readable."
+    },
+    "/visitLogs/{visitId}": {
+      "schema": { "$ref": "#/entities/VisitLog" },
+      "description": "Append-only visit analytics events readable exclusively by Admin."
+    },
+    "/gameScores/{scoreId}": {
+      "schema": { "$ref": "#/entities/GameScore" },
+      "description": "Immutable Angkor Lotus Run high score entries readable by signed-in players."
+    }
+  }
+}

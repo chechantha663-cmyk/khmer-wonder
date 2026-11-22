@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>លេងជាមួយមិត្តភក្តិ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+.lead{margin:-10px 0 22px;color:var(--muted)}
+.row{display:flex;gap:10px;align-items:stretch}
+.row input{flex:1;min-width:0}
+.row button{margin:0;white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;min-height:44px}
+.chip{display:flex;align-items:center;gap:8px;padding:5px 6px 5px 5px;background:#fff;border:2px solid transparent;border-radius:999px;cursor:pointer;font:inherit;font-weight:500;color:var(--ink);box-shadow:0 4px 12px rgba(40,20,80,.12);margin:0;transition:transform .2s,border-color .2s}
+.chip:hover{transform:translateY(-2px);filter:none;box-shadow:0 8px 16px rgba(40,20,80,.18)}
+.chip.on{border-color:var(--accent2);background:#f6efff}
+.chip .av{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;color:#fff;font-weight:700;font-size:.9rem}
+.chip .x{width:22px;height:22px;display:grid;place-items:center;border-radius:50%;font-size:.8rem;color:#8a8aa3;background:#f0eef6}
+.chip .x:hover{background:#ffd9d4;color:var(--err)}
+.hint{color:var(--muted);font-size:.9rem;margin:10px 0 0}
+textarea{width:100%;min-height:74px;padding:10px 14px;font:inherit;color:var(--ink);background:#fff;border:1.5px solid #d9d3e8;border-radius:10px;resize:vertical;transition:border-color .25s,box-shadow .25s}
+textarea:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 4px rgba(123,63,160,.15)}
+.stage{text-align:center;padding:22px 16px;min-height:230px;background:linear-gradient(160deg,#fff4ea,#f3ecfb);border:1px solid rgba(123,63,160,.16);border-radius:18px;display:grid;place-items:center}
+.stage .face{font-size:3.4rem;line-height:1;display:inline-block}
+.stage .face.bounce{animation:bounce .8s cubic-bezier(.3,1.6,.5,1)}
+@keyframes bounce{0%{transform:scale(.4) rotate(-20deg)}60%{transform:scale(1.25) rotate(8deg)}100%{transform:none}}
+.bubble{margin-top:12px;font-size:1.3rem;font-weight:700;line-height:1.7;color:var(--ink)}
+.bubble.pop{animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+.bubble.empty{font-weight:400;color:var(--muted);font-size:1rem}
+.actions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:16px}
+.actions-grid button{margin:0;padding:12px 8px;font-size:.95rem}
+.actions-grid .alt{background:linear-gradient(120deg,var(--accent2),#4b3a9a);box-shadow:0 8px 18px rgba(75,58,154,.35)}
+.togs{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:.95rem}
+.togs label{display:flex;align-items:center;gap:8px;margin:0;cursor:pointer}
+.togs input{width:auto;min-height:0;accent-color:var(--accent2)}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+.content-grid{align-items:start}
+.topnav{display:flex;gap:10px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="fx" aria-hidden="true">
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+  <div class="bird b1"></div><div class="bird b2"></div>
+  <div id="sparks"></div>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<main class="page-shell">
+ <section class="demo-card" aria-labelledby="page-title">
+  <div class="topbar">
+    <p class="eyebrow">JavaScript / Fun Lab</p>
+    <div class="topnav">
+      <a class="nav-btn" href="story.html">📖 រឿងនិទាន <span class="arrow">→</span></a>
+      <a class="nav-btn" href="cat.html">🐱 ឆ្មាអាចារ្យ <span class="arrow">→</span></a>
+      <a class="nav-btn back" href="profile.html"><span class="arrow">←</span> Student profile</a>
+      <a class="nav-btn back" href="index.html"><span class="arrow">←</span> អនុគមន៍</a>
+    </div>
+  </div>
+  <h2 id="page-title">🎉 លេងជាមួយមិត្តភក្តិ</h2>
+  <p class="lead">បញ្ចូលឈ្មោះមិត្តភក្តិ រួចជ្រើសរើសអ្វីដែលចង់ឱ្យវាធ្វើ វានឹងនិយាយ និងអបអរសាទរឱ្យមិត្តរបស់អ្នក!</p>
+
+  <div class="content-grid">
+   <div>
+    <div class="greeting">
+      <label for="friend-input">ឈ្មោះមិត្តភក្តិ</label>
+      <div class="row">
+        <input id="friend-input" type="text" placeholder="ឧទាហរណ៍ ធីតា" autocomplete="off">
+        <button type="button" onclick="addFriend()">＋ បន្ថែម</button>
+      </div>
+      <div id="chips" class="chips" aria-label="បញ្ជីមិត្តភក្តិ"></div>
+      <p class="hint">ចុចលើឈ្មោះដើម្បីជ្រើសរើស ហើយចុច ✕ ដើម្បីលុប។</p>
+    </div>
+
+    <div class="calculation">
+      <label for="custom-text">ឱ្យវានិយាយតាមអ្នក (ប្រើ {name} ជំនួសឈ្មោះមិត្ត)</label>
+      <textarea id="custom-text">{name} ជាមិត្តដ៏ល្អរបស់ខ្ញុំ! ខ្ញុំស្រលាញ់ {name} ណាស់!</textarea>
+      <div class="actions">
+        <button type="button" onclick="runCustom(false)">🗣️ និយាយឱ្យមិត្តដែលបានជ្រើស</button>
+        <button type="button" class="alt-btn" onclick="runCustom(true)" style="background:linear-gradient(120deg,var(--accent2),#4b3a9a);box-shadow:0 8px 18px rgba(75,58,154,.35)">📣 ប្រកាសដល់មិត្តទាំងអស់</button>
+      </div>
+    </div>
+   </div>
+
+   <div>
+    <div class="stage" aria-live="polite">
+      <div>
+        <span id="face" class="face">😊</span>
+        <div id="bubble" class="bubble empty">បន្ថែមមិត្តម្នាក់ ហើយចុចប៊ូតុងខាងក្រោម</div>
+      </div>
+    </div>
+
+    <div class="actions-grid">
+      <button type="button" onclick="doAction('greet')">👋 ស្វាគមន៍</button>
+      <button type="button" onclick="doAction('compliment')">💖 សរសើរ</button>
+      <button type="button" onclick="doAction('fortune')">🔮 ទស្សន៍ទាយ</button>
+      <button type="button" onclick="doAction('nickname')">🏷️ ឈ្មោះក្រៅ</button>
+      <button type="button" onclick="doAction('birthday')">🎂 ជូនពរ</button>
+      <button type="button" onclick="doAction('dare')">🎲 ប្រថុយ</button>
+      <button type="button" onclick="doAction('joke')">😂 កំប្លែង</button>
+      <button type="button" onclick="doAction('random')">✨ ចៃដន្យ</button>
+    </div>
+
+    <div class="togs">
+      <label><input type="checkbox" id="voice-toggle" checked> អានជាសម្លេង</label>
+      <label><input type="checkbox" id="chime-toggle" checked> សំឡេងជួង</label>
+      <label><input type="checkbox" id="confetti-toggle" checked> ផ្កាភ្លើងចាក់</label>
+    </div>
+
+    <div id="voice-picker" class="voice-picker"></div>
+    <p id="voice-note" class="voice-note" role="status"></p>
+   </div>
+  </div>
+ </section>
+</main>
+
+<script src="voice.js"></script>
+<script>
+// ===== ទិន្នន័យសារ (ប្រើ {n} ជំនួសឈ្មោះ) =====
+const MESSAGES = {
+  greet: ["សួស្តី {n}! ថ្ងៃនេះសប្បាយចិត្តទេ?", "ជម្រាបសួរ {n}! រីករាយណាស់ដែលបានជួបអ្នក!", "ហេ {n}! សុខសប្បាយជាទេ?", "ហេ {n}! ខ្ញុំរង់ចាំអ្នកយូរហើយ ទាល់តែឃ្លានបាយ!", "សួស្តី {n}! មុខអ្នកភ្លឺថ្ងៃនេះ ឬជាអំពូលភ្លើងខ្ញុំ?", "{n} មកហើយ! សូមស្វាគមន៍ ដោយអារម្មណ៍ឃ្លានជាមួយគ្នា!", "ជម្រាបសួរ {n}! ថ្ងៃនេះអ្នកអ្នកគេងបានប៉ុន្មានម៉ោង? ឆ្មាខ្ញុំ ១៦!", "សួស្តី {n}! សូមបាត់ពាក្យ ហត់ ពីថ្ងៃនេះ ហើយសប្បាយបន្ត!"],
+  compliment: ["{n} ជាមនុស្សដែលមានទឹកចិត្តល្អណាស់!", "ស្នាមញញឹមរបស់ {n} ធ្វើឱ្យថ្ងៃគ្រប់គ្នាភ្លឺស្វាង!", "{n} ពូកែណាស់ កុំឈប់ព្យាយាមណា!", "មានមិត្តដូច {n} គឺជាសំណាងមួយ!", "{n} ស្អាតខ្លាំងណាស់ សូម្បីតែកញ្ចក់ក៏ញញឹមដាក់!", "{n} ពូកែដល់ម៉្លេះ ទើបខ្ញុំអាចយកអ្នកធ្វើគំរូ!", "ពេលនិយាយពី {n} ត្រូវប្រើពាក្យថា អស្ចារ្យ ជានិច្ច!", "{n} ជាមនុស្សដែលធ្វើឱ្យអ្នកដទៃមានអារម្មណ៍ល្អ!", "បើពិភពលោកមាន {n} ច្រើនទៀត គ្រប់គ្នានឹងសប្បាយ!", "{n} ឆ្លាតដល់ម្ល៉េះ សូម្បីតែ Wi-Fi ក៏ត្រូវតភ្ជាប់ដោយសារអ្នក!"],
+  fortune: ["ថ្ងៃនេះ {n} នឹងមានដំណឹងល្អមួយ!", "សប្តាហ៍នេះ {n} នឹងបានជួបរឿងសប្បាយ!", "សំណាងកំពុងមករក {n} ហើយ!", "ឆាប់ៗនេះ {n} នឹងទទួលបានអំណោយតូចមួយ!", "អ្នកទស្សន៍ទាយថា {n} នឹងឃើញត្រីដ៏ធំមួយ ក្នុងសប្តាហ៍នេះ!", "ផ្កាយប្រាប់ខ្ញុំថា {n} នឹងញ៉ាំអាហារឆ្ងាញ់ ហើយមិនបង់លុយ!", "ក្តីសុបិនរបស់ {n} នឹងក្លាយជាការពិត ពេលដែលភ្ញាក់ពីគេង!", "{n} នឹងជួបមនុស្សពិសេសម្នាក់ នៅថ្ងៃដែលមិនទាន់បានគិត!", "ពិភពលោកកំពុងរៀបចំរឿងល្អមួយសម្រាប់ {n} សូមរង់ចាំ!"],
+  birthday: ["សូមជូនពរ {n}! សូមឱ្យមានសុខភាពល្អ និងសប្បាយរីករាយគ្រប់ថ្ងៃ!", "រីករាយថ្ងៃកំណើត {n}! សូមឱ្យសំណាងល្អតាមជាមួយជានិច្ច!", "សូមជូនពរ {n}! សូមឱ្យនំខេកធំ និងស្ករគ្រាប់ច្រើនៗ!", "{n} អាយុកាន់តែច្រើន តែកាន់តែសង្ហា និងស្អាត! រីករាយថ្ងៃកំណើត!", "សូមឱ្យ {n} ឆាប់ទទួលបានអំណោយដែលអ្នកចង់បាន ក្នុងថ្ងៃកំណើត!"],
+  dare: ["{n} ត្រូវរាំ ១០ វិនាទីឥឡូវនេះ!", "{n} ត្រូវប្រាប់រឿងកំប្លែងមួយឱ្យមិត្តភក្តិស្តាប់!", "{n} ត្រូវធ្វើមុខកំប្លែងឱ្យគ្រប់គ្នាមើល!", "{n} ត្រូវច្រៀងមួយបទឥឡូវនេះ!", "{n} ត្រូវធ្វើសំឡេងសត្វ ៣ ប្រភេទឱ្យគ្រប់គ្នាទាយ!", "{n} ត្រូវហៅឈ្មោះខ្លួនឯង ដោយសម្លេងឆ្មា ៣ ដង!", "{n} ត្រូវដើរថយក្រោយ ១០ ជំហាន ដោយមិនសើច!", "{n} ត្រូវនិយាយរឿងកំប្លែងមួយ ដោយមិនសើចខ្លួនឯង!", "{n} ត្រូវធ្វើជាមនុស្សយន្ត ២០ វិនាទី!"],
+  joke: ["ហេតុអ្វីបានជាកុំព្យូទ័រមិនដែលឃ្លាន? ព្រោះវាញ៉ាំ Byte ពេញថ្ងៃ! ហាហា {n} សើចទៅ!", "{n} ដឹងទេ? ហេតុអ្វីបានជាអ្នកសរសេរកូដចូលចិត្តភាពងងឹត? ព្រោះពន្លឺទាក់ទាញកំហុស Bug! ហាហា!", "{n} ដឹងទេ? ម៉ាស៊ីនបោកខោអាវចូលចិត្តលេបស្រោមជើងម្ខាងរបស់អ្នក! ហាហា!", "{n}! ខ្ញុំសួរថា ហេតុអ្វីឆ្មាមិនលេងអ៊ីនធឺណិត? ព្រោះវាខ្លាចកណ្តុរ ហាហា!", "{n} ដឹងទេ? ខ្ញុំមិនខ្ជិលទេ ខ្ញុំស្ថិតក្នុងរបៀបសន្សំថាមពល!", "{n} ខ្ញុំចង់ធ្វើរបបអាហារ ប៉ុន្តែអាហារបង្កើតមកឱ្យញ៉ាំ មិនមែនឱ្យមើលទេ!", "{n} ដឹងទេ ថ្ងៃច័ន្ទជាមិត្តដែលអ្នកមិនបានអញ្ជើញ តែមកគ្រប់សប្តាហ៍!"]
+};
+const NICKNAMES = ["ស្តេចញញឹម", "ម្ចាស់ចិត្តល្អ", "អ្នកប្រាជ្ញតូច", "ហ្វូងសំណាង", "តារាភ្លឺ", "ខ្លាំងកំពូល", "ព្រះអាទិត្យតូច", "ស្តេចគេង", "ម្ចាស់ត្រី", "ម្ចាស់កណ្តុរ", "សង្ហាក្បែរផ្ទះ", "អ្នកវិទ្យាសាស្ត្រឆ្កួត", "ម្ចាស់ពាក្យកំប្លែង", "ហ្វូងសើច"];
+const FACES = { greet: "👋", compliment: "🥰", fortune: "🔮", nickname: "😎", birthday: "🎂", dare: "🤪", joke: "😂", custom: "📣" };
+
+// ===== អនុគមន៍មានប៉ារ៉ាម៉ែត្រ និងតម្លៃត្រឡប់ =====
+const decks = new Map();
+function pick(list) {
+  let d = decks.get(list);
+  if (!d || !d.cards.length) {
+    const cards = list.slice();
+    for (let i = cards.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [cards[i], cards[j]] = [cards[j], cards[i]]; }
+    if (d && cards.length > 1 && cards[cards.length - 1] === d.last) cards.unshift(cards.pop());
+    d = { cards: cards, last: d ? d.last : null };
+    decks.set(list, d);
+  }
+  d.last = d.cards.pop();
+  return d.last;
+}
+function fillName(template, name) { return template.split("{n}").join(name).split("{name}").join(name); }
+function makeMessage(type, name) {
+  if (type === "nickname") {
+    const nick = pick(NICKNAMES);
+    return "ឈ្មោះក្រៅរបស់ " + name + " គឺ «" + name + " " + nick + "»!";
+  }
+  return fillName(pick(MESSAGES[type]), name);
+}
+function initialOf(name) {
+  return (window.Intl && Intl.Segmenter)
+    ? [...new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(name)][0].segment.toUpperCase()
+    : name.charAt(0).toUpperCase();
+}
+function colorOf(name) {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.codePointAt(0)) % 360;
+  return "hsl(" + h + ",60%,48%)";
+}
+
+// ===== មិត្តភក្តិ (ចងចាំក្នុងកុំព្យូទ័រ) =====
+let friends = [];
+let selected = -1;
+try { friends = JSON.parse(localStorage.getItem("friends") || "[]"); } catch (e) { friends = []; }
+if (friends.length) selected = 0;
+function saveFriends() { try { localStorage.setItem("friends", JSON.stringify(friends)); } catch (e) {} }
+
+function renderChips() {
+  const box = document.getElementById("chips");
+  box.innerHTML = "";
+  friends.forEach(function (name, i) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip" + (i === selected ? " on" : "");
+    const av = document.createElement("span");
+    av.className = "av";
+    av.style.background = colorOf(name);
+    av.textContent = initialOf(name);
+    const t = document.createElement("span");
+    t.textContent = name;
+    const x = document.createElement("span");
+    x.className = "x";
+    x.textContent = "✕";
+    x.setAttribute("aria-label", "លុប " + name);
+    x.addEventListener("click", function (e) { e.stopPropagation(); removeFriend(i); });
+    b.append(av, t, x);
+    b.addEventListener("click", function () { selected = i; renderChips(); });
+    box.appendChild(b);
+  });
+}
+function addFriend() {
+  const input = document.getElementById("friend-input");
+  const name = input.value.trim();
+  if (!name) { playChime(true); input.focus(); return; }
+  if (!friends.includes(name)) friends.push(name);
+  selected = friends.indexOf(name);
+  input.value = "";
+  saveFriends(); renderChips(); playChime(false);
+  input.focus();
+}
+function removeFriend(i) {
+  friends.splice(i, 1);
+  selected = friends.length ? Math.min(selected, friends.length - 1) : -1;
+  saveFriends(); renderChips();
+}
+
+// ===== សំឡេងជួង =====
+let audioCtx = null;
+function tone(f, s, d, type, v) {
+  const t0 = audioCtx.currentTime + s, o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = type || "sine"; o.frequency.value = f;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(v || 0.18, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + d);
+  o.connect(g).connect(audioCtx.destination); o.start(t0); o.stop(t0 + d + 0.05);
+}
+function playChime(isError) {
+  if (!document.getElementById("chime-toggle").checked) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  audioCtx = audioCtx || new AC();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  if (isError) { tone(220, 0, .25, "triangle", .15); tone(165, .12, .3, "triangle", .15); }
+  else { tone(523, 0, .4); tone(659, .1, .4); tone(784, .2, .4); tone(1047, .32, .8, "sine", .13); }
+}
+
+// ===== ផ្កាភ្លើងចាក់ (confetti) =====
+const cv = document.getElementById("confetti"), cx = cv.getContext("2d");
+let parts = [], raf = null;
+function sizeCanvas() { cv.width = innerWidth; cv.height = innerHeight; }
+addEventListener("resize", sizeCanvas); sizeCanvas();
+function burst() {
+  if (!document.getElementById("confetti-toggle").checked || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const colors = ["#e2552d", "#f08a3c", "#ffd36b", "#7b3fa0", "#4b8fe0", "#2fb37c", "#ff6fa5"];
+  for (let i = 0; i < 90; i++) {
+    parts.push({ x: innerWidth / 2 + (Math.random() - .5) * 200, y: innerHeight * .4,
+      vx: (Math.random() - .5) * 14, vy: -Math.random() * 14 - 4, s: 5 + Math.random() * 7,
+      r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: colors[i % colors.length], life: 0 });
+  }
+  if (!raf) raf = requestAnimationFrame(tick);
+}
+function tick() {
+  cx.clearRect(0, 0, cv.width, cv.height);
+  parts.forEach(function (p) {
+    p.vy += .35; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life++;
+    cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r);
+    cx.fillStyle = p.c; cx.globalAlpha = Math.max(0, 1 - p.life / 110);
+    cx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); cx.restore();
+  });
+  parts = parts.filter(function (p) { return p.life < 110 && p.y < cv.height + 20; });
+  raf = parts.length ? requestAnimationFrame(tick) : null;
+  if (!parts.length) cx.clearRect(0, 0, cv.width, cv.height);
+}
+
+// ===== បង្ហាញលទ្ធផល =====
+const bubble = document.getElementById("bubble"), face = document.getElementById("face");
+function show(text, emoji) {
+  bubble.textContent = text;
+  bubble.classList.remove("empty", "pop"); void bubble.offsetWidth; bubble.classList.add("pop");
+  face.textContent = emoji;
+  face.classList.remove("bounce"); void face.offsetWidth; face.classList.add("bounce");
+  playChime(false); burst();
+  if (document.getElementById("voice-toggle").checked) VoicePicker.speak(text, "km-KH");
+}
+function needFriend() {
+  if (selected < 0) {
+    bubble.textContent = "សូមបន្ថែមឈ្មោះមិត្តភក្តិជាមុនសិន។";
+    bubble.classList.remove("empty"); playChime(true);
+    document.getElementById("friend-input").focus();
+    return false;
+  }
+  return true;
+}
+function doAction(type) {
+  if (!needFriend()) return;
+  const kinds = ["greet", "compliment", "fortune", "nickname", "birthday", "dare", "joke"];
+  const real = type === "random" ? pick(kinds) : type;
+  show(makeMessage(real, friends[selected]), FACES[real]);
+}
+function runCustom(toAll) {
+  const text = document.getElementById("custom-text").value.trim();
+  if (!text) { playChime(true); return; }
+  if (!friends.length) { needFriend(); return; }
+  if (toAll) {
+    const all = friends.map(function (n) { return fillName(text, n); });
+    show(all.join("\n"), FACES.custom);
+    bubble.style.whiteSpace = "pre-line";
+  } else {
+    if (!needFriend()) return;
+    bubble.style.whiteSpace = "";
+    show(fillName(text, friends[selected]), FACES.custom);
+  }
+}
+document.getElementById("friend-input").addEventListener("keydown", function (e) { if (e.key === "Enter") addFriend(); });
+
+// ===== ចលនាផ្ទៃខាងក្រោយ =====
+(function () {
+  const box = document.getElementById("sparks");
+  for (let i = 0; i < 22; i++) {
+    const s = document.createElement("i");
+    s.className = "spark";
+    s.style.left = Math.random() * 100 + "%";
+    s.style.animationDuration = 9 + Math.random() * 12 + "s";
+    s.style.animationDelay = -Math.random() * 20 + "s";
+    s.style.transform = "scale(" + (0.6 + Math.random() * 1.4) + ")";
+    box.appendChild(s);
+  }
+  document.querySelectorAll("button:not(.chip)").forEach(function (b) {
+    b.classList.add("ripple");
+    b.addEventListener("click", function (e) {
+      const r = b.getBoundingClientRect(), size = Math.max(r.width, r.height) / 2, s = document.createElement("span");
+      s.className = "r";
+      s.style.cssText = "width:" + size + "px;height:" + size + "px;left:" + (e.clientX - r.left - size / 2) + "px;top:" + (e.clientY - r.top - size / 2) + "px";
+      b.appendChild(s); setTimeout(function () { s.remove(); }, 600);
+    });
+  });
+})();
+
+renderChips();
+</script>
+</body>
+</html>

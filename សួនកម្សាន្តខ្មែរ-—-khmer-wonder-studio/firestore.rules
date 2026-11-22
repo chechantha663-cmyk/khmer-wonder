@@ -1,0 +1,305 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ===== Reusable Global Primitives =====
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isBootstrappedAdmin() {
+      return isVerifiedUser() && request.auth.token.email == 'chechantha663@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin()
+        || (isVerifiedUser() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isVerifiedOwner(userId) {
+      return isVerifiedUser() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // ===== Entity Validation Blueprints =====
+    function isValidThemeId(themeId) {
+      return themeId is string && themeId.size() >= 1 && themeId.size() <= 40 && themeId in [
+        'angkor-amber',
+        'emerald-forest',
+        'mekong-azure',
+        'sunset-meadow',
+        'starry-night',
+        'golden-courtyard'
+      ];
+    }
+
+    function isValidStageMood(mood) {
+      return mood is string && mood.size() >= 1 && mood.size() <= 32 && mood in [
+        'angkor',
+        'forest',
+        'river',
+        'sunset',
+        'night',
+        'courtyard'
+      ];
+    }
+
+    function isValidFriendsList(listVal) {
+      return listVal is list
+        && listVal.size() <= 30
+        && (listVal.size() == 0 || (listVal[0] is string && listVal[0].size() >= 1 && listVal[0].size() <= 40));
+    }
+
+    function isValidStarsMap(mapVal) {
+      return mapVal is map && mapVal.size() <= 100;
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'displayName', 'themeId', 'starsMap', 'friends', 'bestGameScore', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'displayName', 'themeId', 'starsMap', 'friends', 'bestGameScore', 'createdAt', 'updatedAt'])
+        && isValidId(data.uid)
+        && data.uid == request.auth.uid
+        && data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80
+        && isValidThemeId(data.themeId)
+        && isValidStarsMap(data.starsMap)
+        && isValidFriendsList(data.friends)
+        && data.bestGameScore is int && data.bestGameScore >= 0 && data.bestGameScore <= 1000000
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidCustomStory(data) {
+      return data.keys().hasAll(['title', 'moral', 'coverMood', 'chars', 'scenes', 'quizPool', 'poem', 'published', 'authorUid', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['title', 'moral', 'category', 'difficulty', 'coverMood', 'chars', 'scenes', 'quizPool', 'poem', 'published', 'authorUid', 'createdAt', 'updatedAt'])
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 120
+        && data.moral is string && data.moral.size() >= 1 && data.moral.size() <= 240
+        && (!('category' in data) || (data.category is string && data.category.size() <= 20 && data.category in ['wisdom', 'mystery', 'folktale']))
+        && (!('difficulty' in data) || (data.difficulty is string && data.difficulty.size() <= 16 && data.difficulty in ['easy', 'hard']))
+        && isValidStageMood(data.coverMood)
+        && data.chars is list && data.chars.size() == 2
+        && data.chars[0] is string && data.chars[0].size() >= 1 && data.chars[0].size() <= 16
+        && data.chars[1] is string && data.chars[1].size() >= 1 && data.chars[1].size() <= 16
+        && data.scenes is list && data.scenes.size() >= 1 && data.scenes.size() <= 12
+        && data.scenes[0] is map
+        && data.quizPool is list && data.quizPool.size() >= 1 && data.quizPool.size() <= 8
+        && data.quizPool[0] is map
+        && data.poem is list && data.poem.size() >= 1 && data.poem.size() <= 10
+        && data.poem[0] is string && data.poem[0].size() >= 1 && data.poem[0].size() <= 160
+        && data.published is bool
+        && isValidId(data.authorUid)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidVisitLog(data) {
+      return data.keys().hasAll(['sessionId', 'section', 'visitorType', 'visitorName', 'dayKey', 'createdAt'])
+        && data.keys().hasOnly(['sessionId', 'section', 'visitorType', 'visitorName', 'dayKey', 'createdAt'])
+        && data.sessionId is string && data.sessionId.size() >= 4 && data.sessionId.size() <= 64 && data.sessionId.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.section is string && data.section.size() <= 20 && data.section in ['HOME', 'STORIES', 'GAME3D', 'WORDS', 'CAT', 'FRIENDS', 'MATH']
+        && data.visitorType is string && data.visitorType.size() <= 16 && data.visitorType in ['guest', 'user']
+        && data.visitorName is string && data.visitorName.size() >= 1 && data.visitorName.size() <= 60
+        && data.dayKey is string && data.dayKey.size() == 10 && data.dayKey.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && data.createdAt is timestamp;
+    }
+
+    function isValidGameScore(data) {
+      return data.keys().hasAll(['uid', 'playerName', 'score', 'lotuses', 'distance', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'playerName', 'score', 'lotuses', 'distance', 'createdAt'])
+        && isValidId(data.uid)
+        && data.uid == request.auth.uid
+        && data.playerName is string && data.playerName.size() >= 1 && data.playerName.size() <= 60
+        && data.score is int && data.score >= 0 && data.score <= 1000000
+        && data.lotuses is int && data.lotuses >= 0 && data.lotuses <= 50000
+        && data.distance is int && data.distance >= 0 && data.distance <= 500000
+        && data.createdAt is timestamp;
+    }
+
+    function isValidVoiceTranscript(data) {
+      return data.keys().hasAll(['uid', 'title', 'transcript', 'language', 'durationSec', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'title', 'transcript', 'language', 'durationSec', 'createdAt'])
+        && isValidId(data.uid)
+        && data.uid == request.auth.uid
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 120
+        && data.transcript is string && data.transcript.size() >= 1 && data.transcript.size() <= 8000
+        && data.language is string && data.language.size() >= 1 && data.language.size() <= 32
+        && data.durationSec is int && data.durationSec >= 0 && data.durationSec <= 600
+        && data.createdAt is timestamp;
+    }
+
+    function isValidVideoRecord(data) {
+      return data.keys().hasAll(['uid', 'prompt', 'aspectRatio', 'duration', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'prompt', 'aspectRatio', 'duration', 'createdAt'])
+        && isValidId(data.uid)
+        && data.uid == request.auth.uid
+        && data.prompt is string && data.prompt.size() >= 1 && data.prompt.size() <= 1000
+        && data.aspectRatio is string && data.aspectRatio.size() <= 10 && data.aspectRatio in ['16:9', '9:16']
+        && data.duration is string && data.duration.size() <= 10 && data.duration in ['5s', '8s', '10s']
+        && data.createdAt is timestamp;
+    }
+
+    // ===== /admins/{adminUid} =====
+    match /admins/{adminUid} {
+      allow get: if isValidId(adminUid) && isOwner(adminUid);
+      allow list, create, update, delete: if false;
+    }
+
+    // ===== /visitLogs/{visitId} (Append-only visitor telemetry; Admin-only read) =====
+    match /visitLogs/{visitId} {
+      allow get: if isValidId(visitId) && isAdmin();
+      allow list: if isBootstrappedAdmin() && resource.data.dayKey is string;
+
+      allow create: if isValidId(visitId)
+        && isValidVisitLog(incoming())
+        && incoming().createdAt == request.time;
+
+      allow update: if false;
+      allow delete: if isVerifiedUser() && isValidId(visitId) && isAdmin();
+    }
+
+    // ===== /stories/{storyId} (Admin-managed custom stories; published stories public) =====
+    match /stories/{storyId} {
+      allow get: if isValidId(storyId) && (existing().published == true || isAdmin());
+      allow list: if resource.data.published == true || isBootstrappedAdmin();
+
+      allow create: if isVerifiedUser()
+        && isValidId(storyId)
+        && isValidCustomStory(incoming())
+        && incoming().authorUid == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && isAdmin();
+
+      allow update: if isVerifiedUser()
+        && isValidId(storyId)
+        && isValidCustomStory(incoming())
+        && incoming().authorUid == existing().authorUid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'title',
+          'moral',
+          'category',
+          'difficulty',
+          'coverMood',
+          'chars',
+          'scenes',
+          'quizPool',
+          'poem',
+          'published',
+          'updatedAt'
+        ])
+        && isAdmin();
+
+      allow delete: if isVerifiedUser() && isValidId(storyId) && isAdmin();
+    }
+
+    // ===== /users/{userId} (Owner-private; Admin can inspect non-PII player progress) =====
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isBootstrappedAdmin() && resource.data.uid is string;
+
+      allow create: if isVerifiedOwner(userId)
+        && isValidId(userId)
+        && isValidUserProfile(incoming())
+        && incoming().uid == userId
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isVerifiedOwner(userId)
+        && isValidId(userId)
+        && isValidUserProfile(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'themeId', 'starsMap', 'friends', 'bestGameScore', 'updatedAt'])
+        );
+
+      allow delete: if false;
+
+      // ===== /users/{userId}/transcripts/{transcriptId} =====
+      match /transcripts/{transcriptId} {
+        allow get: if isValidId(userId) && isValidId(transcriptId) && isOwner(userId);
+        allow list: if isValidId(userId) && isOwner(userId) && resource.data.uid == request.auth.uid;
+
+        allow create: if isVerifiedOwner(userId)
+          && isValidId(userId)
+          && isValidId(transcriptId)
+          && isValidVoiceTranscript(incoming())
+          && incoming().createdAt == request.time
+          && isAdmin()
+          && exists(/databases/$(database)/documents/users/$(userId));
+
+        allow update: if false;
+
+        allow delete: if isVerifiedOwner(userId)
+          && isValidId(userId)
+          && isValidId(transcriptId)
+          && existing().uid == request.auth.uid;
+      }
+
+      // ===== /users/{userId}/videoPrompts/{videoId} =====
+      match /videoPrompts/{videoId} {
+        allow get: if isValidId(userId) && isValidId(videoId) && isOwner(userId);
+        allow list: if isValidId(userId) && isOwner(userId) && resource.data.uid == request.auth.uid;
+
+        allow create: if isVerifiedOwner(userId)
+          && isValidId(userId)
+          && isValidId(videoId)
+          && isValidVideoRecord(incoming())
+          && incoming().createdAt == request.time
+          && isAdmin()
+          && exists(/databases/$(database)/documents/users/$(userId));
+
+        allow update: if false;
+
+        allow delete: if isVerifiedOwner(userId)
+          && isValidId(userId)
+          && isValidId(videoId)
+          && existing().uid == request.auth.uid;
+      }
+    }
+
+    // ===== /gameScores/{scoreId} =====
+    match /gameScores/{scoreId} {
+      allow get: if isSignedIn() && isValidId(scoreId);
+      allow list: if isSignedIn() && resource.data.score is int && resource.data.score >= 0;
+
+      allow create: if isVerifiedUser()
+        && isValidId(scoreId)
+        && isValidGameScore(incoming())
+        && incoming().createdAt == request.time;
+
+      allow update: if false;
+
+      allow delete: if isVerifiedUser()
+        && isValidId(scoreId)
+        && (existing().uid == request.auth.uid || isAdmin());
+    }
+  }
+}
